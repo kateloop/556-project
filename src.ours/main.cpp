@@ -23,15 +23,16 @@ int main(int argc, char **argv)
 	char *inputFileName = argv[1];
  	char *outputFileName = argv[2];
 
- 	/// create a new routing instance
- 	routingInst *rst = new routingInst;
-	
+	RoutingInst *rst;
+
  	/// read benchmark
  	status = readBenchmark(inputFileName, rst);
  	if(status==0){
  		printf("ERROR: reading input file \n");
  		return 1;
  	}
+
+	/*
 	
  	/// project into 2D
  	status = projectTo2D(rst);
@@ -56,6 +57,7 @@ int main(int argc, char **argv)
  		release(rst);
  		return 1;
  	}
+	*/
 
  	release(rst);
  	printf("\nDONE!\n");	
