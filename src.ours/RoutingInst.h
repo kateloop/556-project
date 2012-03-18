@@ -22,7 +22,7 @@ class RoutingInst
 	int tHeight; /*tile height of one global bin*/
 
 	int numNet; /*Number of nets*/
-	net *nets; /*Array of nets*/
+//	net *nets; /*Array of nets*/
 
 	int edgeNum; /*Number of edges in (3D grid)*/
 	int *edgeCaps; /*Array of the actual edge capacities considering blockage (in the 3D grid so dimension = edgeNum)*/
@@ -36,5 +36,7 @@ class RoutingInst
 	RoutingInst (int xGrid_in, int yGrid_in, int layer_in, int *vCap_in, int *hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
 	
 	/*Public functions*/
-	void add_net (net net_in);
+//	void add_net (net net_in);
 };
+
+#endif // ROUTINGINST_H

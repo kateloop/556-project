@@ -15,9 +15,9 @@ RoutingInst::RoutingInst (int xGrid_in, int yGrid_in, int layer_in, int *vCap_in
 	edgeNum2d = 0;
 }
 
-void add_net (net net_in) {
+/*void add_net (net net_in) {
 	nets[numNet] = net_in;
 	numNet++;
-}
+}*/
 
 
