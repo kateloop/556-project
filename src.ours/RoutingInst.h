@@ -8,6 +8,7 @@
 
 class RoutingInst
 {
+    public:
 	int xGrid; /*The x dimension of the global routing grid*/
 	int yGrid; /*The y dimension of the global routing grid*/
 	int layer; /*The z dimension of the global routing grid (ie number of layers)*/
@@ -30,4 +31,10 @@ class RoutingInst
 	int edgeNum2d; /*Number of 2d edges in the projected 2D grid*/
 	int *edgeCaps2d; /*Array of actual edge capacities in the projected 2d grid graph (so dimension = edgeNum2d), should be modified after reading blockage*/
 	int *edgeUtils2d; /*Array of edge utilizations in the 2D grid graph (may be used during rip-up and reroute in project part 2*/
+
+	/*Constructor*/
+	RoutingInst (int xGrid_in, int yGrid_in, int layer_in, int *vCap_in, int *hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
+	
+	/*Public functions*/
+	void add_net (net net_in);
 };
