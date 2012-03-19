@@ -10,14 +10,11 @@ RoutingInst::RoutingInst (int xGrid_in, int yGrid_in, int layer_in, int *vCap_in
 	lly = lly_in;
 	tWidth = tWidth_in;
 	tHeight = tHeight_in;
-	numNet = 0;
-	edgeNum = 0;
-	edgeNum2d = 0;
 }
 
-/*void add_net (net net_in) {
+void add_net (net net_in) {
 	nets[numNet] = net_in;
 	numNet++;
-}*/
+}
 
 

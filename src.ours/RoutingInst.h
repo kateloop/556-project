@@ -1,6 +1,7 @@
 #ifndef ROUTINGINST_H
 #define ROUTINGINST_H
 
+#include "net.h"
 
 /*
  *  RoutingInst.h - Class for a Routing Instance
