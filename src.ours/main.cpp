@@ -59,7 +59,9 @@ int main(int argc, char **argv)
  	}
 	*/
 
+	/*
  	release(rst);
+	*/
  	printf("\nDONE!\n");	
  	return 0;
 }

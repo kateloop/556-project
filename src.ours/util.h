@@ -1,3 +1,5 @@
+#ifndef UTIL_H
+#define UTIL_H
 
  /**
   * A structure to represent a 3D Point. 
@@ -34,3 +36,5 @@
 
   } route ;
 
+
+#endif

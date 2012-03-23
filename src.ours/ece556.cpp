@@ -9,6 +9,7 @@
 */
 
 #include "ece556.h"
+#include "RoutingInst.h"
 
 int readBenchmark(const char *fileName, RoutingInst *rst){
   ifstream inf;
@@ -20,11 +21,13 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
   int tWidth, tHeight;		// Tile width/height of a bin
   int numNets;			// Number of nets
   int numBlockages;		// Number of blockages
+  string dummy;			// Dummy string for parsing input
 
   // Granularity of grid
-  inf >> xGrid >> yGrid >> zGrid;
+  inf >> dummy >> xGrid >> yGrid >> zGrid;
 
   // Vertical capacities
+  inf >> dummy >> dummy;
   for (int i = 0; i < zGrid; i++) {
     int cap;
     inf >> cap;
@@ -32,17 +35,21 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
   }
 
   // Horizontal capacities
+  inf >> dummy >> dummy;
   for (int i = 0; i < zGrid; i++) {
     int cap;
     inf >> cap;
     hCap.push_back(cap);
   }
-  
-  // LLX, LLY
-  inf >> llx >> lly;
+
+  // LLX, LLY, tWidth, tHeight
+  inf >> llx >> lly >> tWidth >> tHeight;  
+
+  // Make a new instance
+  rst = new RoutingInst(xGrid, yGrid, zGrid, vCap, hCap, llx, lly, tWidth, tHeight);
 
   // Parse nets
-  inf >> numNets;
+  inf >> dummy >> dummy >> numNets;
   for (int i = 0; i < numNets; i++) {
     string netName;
     int netId;
@@ -50,16 +57,18 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     int netSize;		// Ignored
     inf >> netName >> netId >> numPins >> netSize;
 
-    // TODO : CONSTRUCT NET
-
+    Net n(netName, netId, numPins);
     // Parse pins
     for (int j = 0; j < numPins; j++) {
       point3d p;
       inf >> p.x >> p.y >> p.z;
-
-      // TODO : ADD POINT TO NET 
+      n.addPin(p);
     }
+    rst->addNet(n);
   }
+
+  rst->printInput();
+
 
   // Blockages
   inf >> numBlockages;

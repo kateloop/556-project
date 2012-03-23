@@ -1,20 +1,38 @@
 #include "RoutingInst.h"
 
-RoutingInst::RoutingInst (int xGrid_in, int yGrid_in, int layer_in, int *vCap_in, int *hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in) {
-	xGrid = xGrid_in;
-	yGrid = yGrid_in;
-	layer = layer_in;
-	vCap = vCap_in;
-	hCap = hCap_in;
-	llx = llx_in;
-	lly = lly_in;
-	tWidth = tWidth_in;
-	tHeight = tHeight_in;
+#include <stdio.h>
+
+using namespace std;
+
+RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, vector<int> &hCap, int llx, int lly, int tWidth, int tHeight) :
+  xGrid(xGrid), 
+  yGrid(yGrid),
+  zGrid(zGrid),
+  vCap(vCap), 
+  hCap(hCap),
+  llx(llx),
+  lly(lly),
+  tWidth(tWidth),
+  tHeight(tHeight)
+{
+  
 }
 
-void add_net (net net_in) {
-	nets[numNet] = net_in;
-	numNet++;
+void RoutingInst::addNet(Net n)
+{
+  nets.push_back(n);
 }
 
-
+void RoutingInst::printInput()
+{
+  printf("grid %d %d %d\n", xGrid, yGrid, zGrid);
+  printf("vertical capacity ");
+  for (int i = 0; i < vCap.size(); i++)
+    printf("%d ", vCap[i]);
+  printf("\nhorizontal capacity ");
+  for (int i = 0; i < hCap.size(); i++)
+    printf("%d ", hCap[i]);
+  printf("\n%d %d %d %d\n", llx, lly, tWidth, tHeight);
+  for (int i = 0; i < nets.size(); i++)
+    nets[i].printInput();
+}
