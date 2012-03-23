@@ -21,9 +21,9 @@ int main(int argc, char **argv)
 
  	int status;
 	char *inputFileName = argv[1];
- 	char *outputFileName = argv[2];
+ 	//char *outputFileName = argv[2];
 
-	RoutingInst *rst;
+	RoutingInst *rst = NULL;
 
  	/// read benchmark
  	status = readBenchmark(inputFileName, rst);

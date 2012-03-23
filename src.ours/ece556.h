@@ -21,44 +21,8 @@
 using namespace std;
 
 // Local includes
+#include "util.h"
 #include "RoutingInst.h"
-#include "Net.h"
-
- /**
-  * A structure to represent a 3D Point. 
-  */
- typedef struct
- {
-   int x ; /* The x coordinate (>=0 in the routing grid)*/
-   int y ; /* The y coordinate (>=0 in the routing grid)*/
-   int z ; /* The z coordinate (>=0 in the routing grid)*/
-
- } point3d ;
-
-  /**
-  * A structure to represent a segment
-  */
- typedef struct
- {
-   point3d one ; 	/* The start point of a segment */
-   point3d two ; 	/* The end point of a segment */
-   
-   int edgeNum ; 	/* Number of edges in the segment*/
-   int *edges ;  	/* An array of edges representing the segment*/
-   
- } segment ;
- 
- 
-  /**
-  * A structure to represent a route
-  */
-  typedef struct
-  {
-    int segNum ;  	/* Number of segments in a route*/
-    segment *segments ;  /* An array of segments (note, a segment may be flat, L-shaped or any other shape, based on your preference */
-
-  } route ;
-
 
   /*! \fn int readBenchmark(const char *fileName, routingInst *rst)
 	    \brief Read in the benchmark file and initialize the routing instance.
@@ -74,7 +38,7 @@ using namespace std;
   */
 
 
-  int readBenchmark(const char *fileName, RoutingInst *rst);
+int readBenchmark(const char *fileName, RoutingInst *rst);
   /*! \fn int release(routingInst *rst)
     	\brief Release the memory for all the allocated data structures. 
 	       Failure to release will likely cause memory problems after multiple runs of your program. 

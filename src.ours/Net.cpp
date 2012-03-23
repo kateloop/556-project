@@ -1,16 +1,14 @@
 #include "Net.h"
 
 /*constructor*/
-Net::Net (char *name_in, int id_in, int pinNum_in, point3d *pins_in) {
+Net::Net (string name_in, int id_in, int pinNum_in) {
 	name = name_in;
 	id = id_in;
 	pinNum = pinNum_in;
-	pins = pins_in;
 }
 	
 /*Public functions*/
-void add_route (route route) {
-	routes[routeNum] = route;
-	routeNum++;	
+void addPin(point3d pin)
+{
 }
 
