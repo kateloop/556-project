@@ -1,7 +1,7 @@
 #ifndef ROUTINGINST_H
 #define ROUTINGINST_H
 
-#include "net.h"
+#include "Net.h"
 
 /*
  *  RoutingInst.h - Class for a Routing Instance
@@ -23,7 +23,7 @@ class RoutingInst
 	int tHeight; /*tile height of one global bin*/
 
 	int numNet; /*Number of nets*/
-//	net *nets; /*Array of nets*/
+//	Net *nets; /*Array of nets*/
 
 	int edgeNum; /*Number of edges in (3D grid)*/
 	int *edgeCaps; /*Array of the actual edge capacities considering blockage (in the 3D grid so dimension = edgeNum)*/

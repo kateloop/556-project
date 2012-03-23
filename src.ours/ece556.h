@@ -22,7 +22,7 @@ using namespace std;
 
 // Local includes
 #include "RoutingInst.h"
-#include "net.h"
+#include "Net.h"
 
  /**
   * A structure to represent a 3D Point. 
