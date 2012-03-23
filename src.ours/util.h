@@ -12,7 +12,17 @@
 
  } point3d ;
 
-  /**
+/**
+ * A structure to represent an edge
+ */
+typedef struct
+{
+  point3d one;
+  point3d two;
+} edge;
+
+
+/*
   * A structure to represent a segment
   */
  typedef struct
@@ -24,7 +34,7 @@
    int *edges ;  	/* An array of edges representing the segment*/
    
  } segment ;
- 
+
  
   /**
   * A structure to represent a route
