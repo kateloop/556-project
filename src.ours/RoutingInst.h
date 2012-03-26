@@ -22,6 +22,8 @@ class RoutingInst
 	
 	/*Public functions*/
 	void addNet (Net n);
+
+	void addBlockage(point3d p1, point3d p2, int cap);
  public:
 	void printInput();
 
@@ -41,7 +43,7 @@ class RoutingInst
 	int numNet;       /*Number of nets*/
 	vector<Net> nets; /* Nets */
 
-	map<edge, int> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
+	map<edge, int, edgeComp> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
 
 };
 

@@ -24,6 +24,14 @@ void RoutingInst::addNet(Net n)
   nets.push_back(n);
 }
 
+void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
+{
+  edge e;
+  e.one = p1;
+  e.two = p2;
+  edgeUtilization[e] = cap;
+}
+
 void RoutingInst::printInput()
 {
   printf("grid %d %d %d\n", xGrid, yGrid, zGrid);
