@@ -19,6 +19,11 @@ point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight)
 
 bool operator<(point3d p1, point3d p2)
 {
-  return true;
+  if (p1.x != p2.x)
+    return p1.x < p2.x;
+  else if (p1.y != p2.y)
+    return p1.y < p2.y;
+  else
+    return p1.z < p2.z;
 }
 
