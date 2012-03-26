@@ -29,3 +29,8 @@ void Net::addRoute(route r)
 {
   routes.push_back(r);
 }
+
+vector<point3d> &Net::getGPins()
+{
+  return gPins;
+}
