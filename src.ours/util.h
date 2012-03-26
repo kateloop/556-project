@@ -47,4 +47,7 @@ typedef struct
   } route ;
 
 
+/* Placement routing grid coordinates to global routing grid */
+point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight);
+
 #endif

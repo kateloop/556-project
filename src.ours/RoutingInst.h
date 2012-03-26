@@ -1,9 +1,10 @@
 #ifndef ROUTINGINST_H
 #define ROUTINGINST_H
 
-#include "Net.h"
 #include <vector>
 #include <map>
+
+#include "Net.h"
 
 using std::vector;
 using std::map;
@@ -38,6 +39,7 @@ class RoutingInst
 
 	int numNet;       /*Number of nets*/
 	vector<Net> nets; /* Nets */
+
 };
 
 #endif // ROUTINGINST_H

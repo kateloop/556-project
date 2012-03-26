@@ -15,6 +15,7 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   tWidth(tWidth),
   tHeight(tHeight)
 {
+
   
 }
 

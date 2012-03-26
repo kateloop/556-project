@@ -17,12 +17,13 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "RoutingInst.h"
+#include "Net.h"
 
 using namespace std;
 
 // Local includes
 #include "util.h"
-#include "RoutingInst.h"
 
   /*! \fn int readBenchmark(const char *fileName, routingInst *rst)
 	    \brief Read in the benchmark file and initialize the routing instance.

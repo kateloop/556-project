@@ -9,7 +9,6 @@
 */
 
 #include "ece556.h"
-#include "RoutingInst.h"
 
 int readBenchmark(const char *fileName, RoutingInst *rst){
   ifstream inf;
@@ -62,7 +61,7 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     for (int j = 0; j < numPins; j++) {
       point3d p;
       inf >> p.x >> p.y >> p.z;
-      n.addPin(p);
+      n.addPin(p, llx, lly, tWidth, tHeight);
     }
     rst->addNet(n);
   }
