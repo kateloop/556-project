@@ -48,6 +48,16 @@ void RoutingInst::printInput()
     nets[i].printInput();
   printf("Blockages:\n");
   for (map<edge, int>::iterator it = edgeUtilization.begin(); it != edgeUtilization.end(); it++) {
-    printf("block\n");
+    edge e = (*it).first;
+    int cap = (*it).second;
+    point3d p1 = e.first;
+    point3d p2 = e.second;
+    printf("Blockage: (%d, %d, %d) -> (%d, %d, %d) : %d\n", p1.x, p1.y, p1.z,
+	   p2.x, p2.y, p2.z, cap);
   }
+}
+
+void RoutingInst::route()
+{
+  printf("Routing\n");
 }

@@ -27,10 +27,13 @@ int main(int argc, char **argv)
 
  	/// read benchmark
  	status = readBenchmark(inputFileName, rst);
- 	if(status==0){
- 		printf("ERROR: reading input file \n");
- 		return 1;
+ 	if (status) {
+	  printf("ERROR: reading input file \n");
+	  return 1;
  	}
+
+	// route
+	rst->route();
 
 	/*
 	

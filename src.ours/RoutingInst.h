@@ -16,16 +16,15 @@ using std::map;
 
 class RoutingInst
 {
-    public:
+ public:
 	/*Constructor*/
 	RoutingInst (int xGrid_in, int yGrid_in, int zGrid_in, vector<int> &vCap_in, vector<int> &hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
 	
 	/*Public functions*/
 	void addNet (Net n);
-
 	void addBlockage(point3d p1, point3d p2, int cap);
- public:
 	void printInput();
+	void route();
 
  private:
 	int xGrid; /*The x dimension of the global routing grid*/
