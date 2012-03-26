@@ -27,4 +27,5 @@ void Net::printInput()
 
 void Net::addRoute(route r)
 {
+  routes.push_back(r);
 }
