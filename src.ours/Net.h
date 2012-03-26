@@ -23,7 +23,7 @@ class Net {
   vector<point3d> pPins; 	/* An array of pins in the placement grid (3d) */
   vector<point3d> gPins;	/* An array of pins in the global routing grid (2d) */
   int routeNum;     	/* Number of (candidate) routes of the net. This may be equal to one (only one candidate route) in your implementation. */
-  //  vector<route> routes;	/* An array of candidate routes of the net. */
+  vector<route> routes;	/* An array of candidate routes of the net. */
   
  public:
   /*constructor*/
@@ -32,6 +32,7 @@ class Net {
   /*Public functions*/
   void addPin(point3d pin, int llx, int lly, int tWidth, int tHeight);
   void printInput();
+  void addRoute(route r);
 };
 
 #endif

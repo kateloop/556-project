@@ -33,7 +33,7 @@ int main(int argc, char **argv)
  	}
 
 	// route
-	rst->route();
+	rst->solveRouting();
 
 	/*
 	

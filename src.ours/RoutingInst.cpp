@@ -57,7 +57,15 @@ void RoutingInst::printInput()
   }
 }
 
-void RoutingInst::route()
+void RoutingInst::solveRouting()
 {
   printf("Routing\n");
+  for (vector<Net>::iterator it = nets.begin(); it != nets.end(); it++) {
+    (*it).addRoute(findRoute(*it));
+  }
+}
+
+route RoutingInst::findRoute(Net n)
+{
+
 }

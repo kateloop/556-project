@@ -24,7 +24,7 @@ class RoutingInst
 	void addNet (Net n);
 	void addBlockage(point3d p1, point3d p2, int cap);
 	void printInput();
-	void route();
+	void solveRouting();
 
  private:
 	int xGrid; /*The x dimension of the global routing grid*/
@@ -43,6 +43,8 @@ class RoutingInst
 	vector<Net> nets; /* Nets */
 
 	map<edge, int, edgeComp> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
+
+	route findRoute(Net);
 
 };
 

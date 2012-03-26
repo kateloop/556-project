@@ -2,7 +2,9 @@
 #define UTIL_H
 
 #include <utility>
+#include <vector>
 
+using std::vector;
 using std::pair;
 
  /**
@@ -16,10 +18,16 @@ using std::pair;
 
  } point3d ;
 
+
 /**
  * A structure to represent an edge
  */
 typedef pair<point3d, point3d> edge;
+
+/**
+ *  A route
+ **/
+typedef vector<edge> route;
 
 bool operator<(point3d p1, point3d p2);
 
@@ -34,7 +42,5 @@ class edgeComp {
 
 /* Placement routing grid coordinates to global routing grid */
 point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight);
-
-
 
 #endif
