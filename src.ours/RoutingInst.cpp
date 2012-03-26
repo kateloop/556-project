@@ -13,7 +13,7 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   llx(llx),
   lly(lly),
   tWidth(tWidth),
-  tHeight(tHeight)
+  tHeight(tHeight)  
 {
 
   
@@ -59,13 +59,15 @@ void RoutingInst::printInput()
 
 void RoutingInst::solveRouting()
 {
-  printf("Routing\n");
-  for (vector<Net>::iterator it = nets.begin(); it != nets.end(); it++) {
-    (*it).addRoute(findRoute(*it));
+  printf("Routing %d nets\n", nets.size());
+  for (int i = 0; i < nets.size(); i++) {
+    findRoute(nets[i]);
   }
 }
 
-route RoutingInst::findRoute(Net n)
+route RoutingInst::findRoute(Net &n)
 {
-  
+  printf("Finding a route for net %s", n.getName().c_str());
+  route r;
+  return r;
 }

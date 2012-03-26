@@ -33,6 +33,7 @@ class Net {
   void addPin(point3d pin, int llx, int lly, int tWidth, int tHeight);
   void printInput();
   void addRoute(route r);
+  string getName();
 
   /* Get global routing grid pins */
   vector<point3d> &getGPins();

@@ -80,6 +80,8 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
   }
 
   rst->printInput();
+
+  rst->solveRouting();
   return 0;
 }
 

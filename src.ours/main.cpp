@@ -32,9 +32,6 @@ int main(int argc, char **argv)
 	  return 1;
  	}
 
-	// route
-	rst->solveRouting();
-
 	/*
 	
  	/// project into 2D

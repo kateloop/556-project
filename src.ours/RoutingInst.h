@@ -44,7 +44,7 @@ class RoutingInst
 
 	map<edge, int, edgeComp> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
 
-	route findRoute(Net);
+	route findRoute(Net&);
 
 };
 

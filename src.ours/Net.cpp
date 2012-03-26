@@ -34,3 +34,8 @@ vector<point3d> &Net::getGPins()
 {
   return gPins;
 }
+
+string Net::getName()
+{
+  return name;
+}
