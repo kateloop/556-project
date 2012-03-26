@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 
+#include "util.h"
 #include "Net.h"
 
 using std::vector;
@@ -39,6 +40,8 @@ class RoutingInst
 
 	int numNet;       /*Number of nets*/
 	vector<Net> nets; /* Nets */
+
+	map<edge, int> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
 
 };
 
