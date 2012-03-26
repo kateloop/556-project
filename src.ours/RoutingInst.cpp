@@ -27,8 +27,8 @@ void RoutingInst::addNet(Net n)
 void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 {
   edge e;
-  e.one = p1;
-  e.two = p2;
+  e.first = p1;
+  e.second = p2;
   edgeUtilization[e] = cap;
 }
 
@@ -39,9 +39,15 @@ void RoutingInst::printInput()
   for (int i = 0; i < vCap.size(); i++)
     printf("%d ", vCap[i]);
   printf("\nhorizontal capacity ");
+  printf("\nPlacement grid:\n");
   for (int i = 0; i < hCap.size(); i++)
     printf("%d ", hCap[i]);
+  printf("\nGlobal routing grid:\n");
   printf("\n%d %d %d %d\n", llx, lly, tWidth, tHeight);
   for (int i = 0; i < nets.size(); i++)
     nets[i].printInput();
+  printf("Blockages:\n");
+  for (map<edge, int>::iterator it = edgeUtilization.begin(); it != edgeUtilization.end(); it++) {
+    printf("block\n");
+  }
 }

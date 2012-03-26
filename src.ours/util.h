@@ -1,6 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <utility>
+
+using std::pair;
+
  /**
   * A structure to represent a 3D Point. 
   */
@@ -15,17 +19,15 @@
 /**
  * A structure to represent an edge
  */
-typedef struct
-{
-  point3d one;
-  point3d two;
-} edge;
+typedef pair<point3d, point3d> edge;
+
+bool operator<(point3d p1, point3d p2);
 
 class edgeComp {
  public: 
   bool operator()(const edge e1, const edge e2)
   {
-    return false;
+    return e1 < e2;
   }
 };
 

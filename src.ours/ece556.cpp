@@ -66,14 +66,20 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     rst->addNet(n);
   }
 
-  rst->printInput();
-
-
   // Blockages
   inf >> numBlockages;
+  cout << numBlockages;
+
   for (int i = 0; i < numBlockages; i++) {
-    
+    point3d p1, p2;
+    int cap;
+    inf >> p1.x >> p1.y >> p1.z;
+    inf >> p2.x >> p2.y >> p2.z;
+    inf >> cap;
+    rst->addBlockage(p1, p2, cap);
   }
+
+  rst->printInput();
 
   return 1;
 }

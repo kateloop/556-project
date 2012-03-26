@@ -17,3 +17,8 @@ point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight)
   return g;
 }
 
+bool operator<(point3d p1, point3d p2)
+{
+  return true;
+}
+
