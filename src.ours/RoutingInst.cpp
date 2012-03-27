@@ -63,10 +63,57 @@ void RoutingInst::printInput()
 
 void RoutingInst::solveRouting()
 {
+  /* Make blockage adjustments */
+  for (int i = 0; i < blockages.size(); i++) {
+    // Pull out blockage fields
+    blockage b = blockages[i];
+    edge e = b.first;
+    int bcap = b.second;
+    // Get routed capcacity
+    int rcap = getCap(e);
+    if (isVertical(e)) {
+      rcap -= vCap[e.first.z - 1]; // z index starts at 1..
+      rcap += bcap;
+    } else { // horizontal
+      rcap -= hCap[e.first.z - 1]; // z index starts at 1..
+      rcap += bcap;
+    }
+    setCap(e, rcap);
+    printf("Setting capacity of edge to %d\n", rcap);
+  }
+
+  printf("Horizontal capacities:\n");
+  for (int y = 0; y < yGrid; y++) {
+    for (int x = 0; x < xGrid-1; x++) {
+      edge e;
+      e.first.x = x;
+      e.second.x = x+1;
+      e.first.y = y;
+      e.second.y = y;
+      printf("%d ", getCap(e));
+    }
+    printf("\n");
+  }
+  
+  printf("Vertical capacities:\n");
+  for (int y = 0; y < yGrid-1; y++) {
+    for (int x = 0; x < xGrid; x++) {
+      edge e;
+      e.first.x = x;
+      e.second.x = x;
+      e.first.y = y;
+      e.second.y = y+1;
+      printf("%d ", getCap(e));
+    }
+    printf("\n");
+  }
+
   printf("Routing %d nets\n", nets.size());
   for (int i = 0; i < nets.size(); i++) {
     findRoute(nets[i]);
   }
+
+
 }
 
 route RoutingInst::findRoute(Net &n)
@@ -75,3 +122,39 @@ route RoutingInst::findRoute(Net &n)
   route r;
   return r;
 }
+
+/* get capacity of edge, initialize if needed */
+int RoutingInst::getCap(edge e)
+{
+  // Initialize if necessary
+  if (!edgeCapInitd[e]) {
+    edgeCapInitd[e] = true;
+    if (isVertical(e)) {
+      for (int i = 0; i < vCap.size(); i++)
+	edgeCap[e] += vCap[i];
+    } else {
+      for (int i = 0; i < hCap.size(); i++)
+	edgeCap[e] += hCap[i];
+    }
+  }
+  return edgeCap[e];
+}
+
+/* write over previous capacity */
+void RoutingInst::setCap(edge e, int cap)
+{
+  edgeCapInitd[e] = true;
+  edgeCap[e] = cap;
+}
+
+bool RoutingInst::isVertical(edge e)
+{
+  return e.first.y != e.second.y;
+}
+
+bool RoutingInst::isHorizontal(edge e)
+{
+  return !isVertical(e);
+}
+
+

@@ -45,9 +45,18 @@ class RoutingInst
 	vector<Net> nets; /* Nets */
 	
 	vector<blockage> blockages; /* Blocked edges */
+	map<edge, int, edgeComp> edgeCap; /* 2D edge capacity utilization (Global routing grid) */
 	map<edge, bool, edgeComp> edgeCapInitd; /* Edge capacity initialized */
-	map<edge, int, edgeComp> edgeCap; /* Edge capacity utilization (Global routing grid) */
 
+	/* Safely set and get capacities */
+	void setCap(edge e, int cap);
+	int getCap(edge e);
+
+	/* Is an edge vertical or horizontal */
+	bool isVertical(edge e);
+	bool isHorizontal(edge e);
+
+	/* Find a route for a net */
 	route findRoute(Net&);
 
 };
