@@ -15,7 +15,7 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   tWidth(tWidth),
   tHeight(tHeight)  
 {
-
+  
   
 }
 
@@ -26,10 +26,13 @@ void RoutingInst::addNet(Net n)
 
 void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 {
+  blockage b;
   edge e;
   e.first = p1;
   e.second = p2;
-  edgeUtilization[e] = cap;
+  b.first = e;
+  b.second = cap;
+  blockages.push_back(b);
 }
 
 void RoutingInst::printInput()
@@ -47,9 +50,10 @@ void RoutingInst::printInput()
   for (int i = 0; i < nets.size(); i++)
     nets[i].printInput();
   printf("Blockages:\n");
-  for (map<edge, int>::iterator it = edgeUtilization.begin(); it != edgeUtilization.end(); it++) {
-    edge e = (*it).first;
-    int cap = (*it).second;
+  for (vector<blockage>::iterator it = blockages.begin(); it != blockages.end(); it++) {
+    blockage b = *it;
+    edge e = b.first;
+    int cap = b.second;
     point3d p1 = e.first;
     point3d p2 = e.second;
     printf("Blockage: (%d, %d, %d) -> (%d, %d, %d) : %d\n", p1.x, p1.y, p1.z,

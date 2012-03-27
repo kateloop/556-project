@@ -1,3 +1,7 @@
+/*
+ *  RoutingInst.h - Class for a Routing Instance
+ */
+
 #ifndef ROUTINGINST_H
 #define ROUTINGINST_H
 
@@ -10,9 +14,7 @@
 using std::vector;
 using std::map;
 
-/*
- *  RoutingInst.h - Class for a Routing Instance
- */
+typedef pair<edge, int> blockage;
 
 class RoutingInst
 {
@@ -41,8 +43,10 @@ class RoutingInst
 
 	int numNet;       /*Number of nets*/
 	vector<Net> nets; /* Nets */
-
-	map<edge, int, edgeComp> edgeUtilization; /* Edge capacity utilization (Global routing grid) */
+	
+	vector<blockage> blockages; /* Blocked edges */
+	map<edge, bool, edgeComp> edgeCapInitd; /* Edge capacity initialized */
+	map<edge, int, edgeComp> edgeCap; /* Edge capacity utilization (Global routing grid) */
 
 	route findRoute(Net&);
 

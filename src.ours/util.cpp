@@ -17,13 +17,13 @@ point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight)
   return g;
 }
 
+
+/* operator< - used to compare points (only considers 2d) */
 bool operator<(point3d p1, point3d p2)
 {
   if (p1.x != p2.x)
     return p1.x < p2.x;
-  else if (p1.y != p2.y)
-    return p1.y < p2.y;
   else
-    return p1.z < p2.z;
+    return p1.y < p2.y;
 }
 
