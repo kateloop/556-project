@@ -56,12 +56,12 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     int netSize;		// Ignored
     inf >> netName >> netId >> numPins >> netSize;
 
-    Net n(netName, netId, numPins);
+    Net n(netName, netId, numPins, llx, lly, tWidth, tHeight);
     // Parse pins
     for (int j = 0; j < numPins; j++) {
       point3d p;
       inf >> p.x >> p.y >> p.z;
-      n.addPin(p, llx, lly, tWidth, tHeight);
+      n.addPin(p);
     }
     rst->addNet(n);
   }

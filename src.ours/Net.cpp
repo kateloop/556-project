@@ -2,18 +2,43 @@
 #include "util.h"
 
 /*constructor*/
-Net::Net (string name, int id, int pinNum) :
+Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHeight) :
   name(name),
   id(id),
-  pinNum(pinNum)
+  pinNum(pinNum),
+  llx(llx),
+  lly(lly),
+  tWidth(tWidth),
+  tHeight(tHeight)
 {
 }
 	
 /*Public functions*/
-void Net::addPin(point3d pin, int llx, int lly, int tWidth, int tHeight)
+void Net::addPin(point3d pin)
 {
   pPins.push_back(pin);
   gPins.push_back(ptog(pin, llx, lly, tWidth, tHeight));
+}
+
+void Net::printRoute()
+{
+  if (!routes.size()) {
+    printf("ERR: printRoute called on Net without route\n");
+    return;
+  }
+  
+  route r = routes[0];
+
+  printf("%s %d %d\n", name.c_str(), id, r.size());
+  
+  for (int i = 0; i < r.size(); i++) {
+    edge e = r[i];
+    point3d p1 = gtop(e.first, llx, lly, tWidth, tHeight);
+    point3d p2 = gtop(e.second, llx, lly, tWidth, tHeight);
+    printf("(%d,%d,%d)-(%d,%d,%d)\n", p1.x, p1.y, p1.z,
+	   p2.x, p2.y, p2.z);
+  }
+  printf("!\n");
 }
 
 void Net::printInput()

@@ -17,6 +17,15 @@ point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight)
   return g;
 }
 
+point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight)
+{
+  point3d p;
+  p.x = g.x * tWidth + llx;
+  p.y = g.y * tHeight + lly;
+  p.z = g.z + 1;
+  return p;
+}
+
 
 /* operator< - used to compare points (only considers 2d) */
 bool operator<(point3d p1, point3d p2)

@@ -59,23 +59,79 @@ void RoutingInst::solveRouting()
 
   printf("Routing %d nets\n", nets.size());
   int ct = 0;
-  time_t start, end;
+  const int res = 500;
+  time_t start, last, end;
   time(&start);
+  time(&last);
   for (int i = 0; i < nets.size(); i++) {
-    findRoute(nets[i]);
+    nets[i].addRoute(findRoute(nets[i]));
 
     /* Status */
-    if (!(++ct%100)) {
+    if (!(++ct % res)) {
       time(&end);
-      int diff = difftime(end, start);
-      printf("%ds: %d% (%d/%d) nets\t%d rps\n", diff, ct*100/nets.size(), ct, nets.size(), ct/diff);
+      int elapsed = difftime(end, start);
+      int diff = difftime(end, last);
+      printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, ct*100/nets.size(), ct, nets.size(), res/diff, (nets.size() - ct) / (res/diff) / 60);
+      time(&last);
     }
+  }
+
+  // Done - write to file
+  for (int i = 0; i < nets.size(); i++) {
+    nets[i].printRoute();
   }
 }
 
 route RoutingInst::findRoute(Net &n)
 {
-  return bfsRoute(n);
+  route r = bfsRoute(n);
+
+  int vLayer, hLayer;
+  
+  for (int i = 0; i < vCap.size(); i++) {
+    if (vCap[i]) {
+      vLayer = i;
+      break;
+    }
+  }
+  
+  for (int i = 0; i < hCap.size(); i++) {
+    if (hCap[i]) {
+      hLayer = i;
+      break;
+    }
+  }
+
+  // Add vias and change layers as needed
+  for (int i = 0; i < r.size(); i++) {
+    edge &e = r[i];
+    // Set layer
+    if (isVertical(e)) {
+      e.first.z = vLayer;
+      e.second.z = vLayer;
+    } else {
+      e.first.z = hLayer;
+      e.second.z = hLayer;      
+    }
+
+    // Add vias
+    if (i > 0) {		// Not needed on first edge
+      edge prev = r[i-1];
+      if (prev.second.z != e.first.z) { // Via needed
+	edge via;
+	// Connect
+	via.first.x = prev.second.x;
+	via.first.y = prev.second.y;
+	via.first.z = prev.second.z;
+	via.second.x = e.first.x;
+	via.second.y = e.first.y;
+	via.second.z = e.first.z;
+	// Insert
+	r.insert(r.begin() + i, via);
+      }
+    }
+  }
+  return r;
 }
 
 /* get capacity of edge, initialize if needed */

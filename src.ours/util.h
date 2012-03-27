@@ -45,4 +45,7 @@ class edgeComp {
 /* Placement routing grid coordinates to global routing grid */
 point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight);
 
+/* Routing grid to placement grid */
+point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight);
+
 #endif
