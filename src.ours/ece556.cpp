@@ -79,7 +79,7 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     rst->addBlockage(p1, p2, cap);
   }
 
-  rst->printInput();
+  //rst->printInput();
 
   rst->solveRouting();
   return 0;

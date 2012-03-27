@@ -34,6 +34,7 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   b.first = e;
   b.second = cap;
   blockages.push_back(b);
+  isBlocked[e] = true;
 }
 
 void RoutingInst::printInput()
@@ -80,9 +81,10 @@ void RoutingInst::solveRouting()
       rcap += bcap;
     }
     setCap(e, rcap);
-    printf("Setting capacity of edge to %d\n", rcap);
+    //printf("Setting capacity of edge to %d\n", rcap);
   }
 
+  /*
   printf("Horizontal capacities:\n");
   for (int y = 0; y < yGrid; y++) {
     for (int x = 0; x < xGrid-1; x++) {
@@ -108,19 +110,18 @@ void RoutingInst::solveRouting()
     }
     printf("\n");
   }
-
+  */
   printf("Routing %d nets\n", nets.size());
+  int ct = 0;
   for (int i = 0; i < nets.size(); i++) {
+    if (!(ct++%100))
+      printf("(%d/%d) nets routed\n", ct, nets.size());
     findRoute(nets[i]);
   }
-
-
 }
 
 route RoutingInst::findRoute(Net &n)
 {
-  printf("Finding a route for net %s", n.getName().c_str());
-  
   return bfsRoute(n);
 }
 
@@ -158,17 +159,6 @@ bool RoutingInst::isHorizontal(edge e)
   return !isVertical(e);
 }
 
-/* Edges */
-bool RoutingInst::isBlocked(edge e)
-{
-  for (int i = 0; i < blockages.size(); i++)
-    if (blockages[i].first == e)
-      return true;
-  return false;
-}
-
-
-
 /********************************************************************************
  *  Routing Algorithms
  ********************************************************************************/
@@ -204,7 +194,7 @@ route RoutingInst::bfsRoute(Net &n)
       // Goal test
       if (p == goal) {
 	while (p != start) {
-	  printf("(%d,%d)\n", p.x, p.y);
+	  //printf("(%d,%d)\n", p.x, p.y);
 	  edge e;
 	  e.first = p;
 	  e.second = prev[p];
@@ -228,25 +218,25 @@ route RoutingInst::bfsRoute(Net &n)
 	edge e;
 	e.first = p;
 	e.second = up;
-	if (!started[up] && !isBlocked(e) && up.x >= 0 && up.y >= 0) {
+	if (!started[up] && !isBlocked[e] && up.x >= 0 && up.y >= 0) {
 	  prev[up] = p;
 	  started[up] = true;
 	  open.push(up);
 	}
 	e.second = down;
-	if (!started[down] && !isBlocked(e) && down.x >= 0 && down.y >= 0) {
+	if (!started[down] && !isBlocked[e] && down.x >= 0 && down.y >= 0) {
 	  prev[down] = p;
 	  started[down] = true;
 	  open.push(down);
 	}
 	e.second = left;
-	if (!started[left] && !isBlocked(e) && left.x >= 0 && left.y >= 0) {
+	if (!started[left] && !isBlocked[e] && left.x >= 0 && left.y >= 0) {
 	  prev[left] = p;
 	  started[left] = true;
 	  open.push(left);
 	}
 	e.second = right;
-	if (!started[right] && !isBlocked(e) && right.x >= 0 && right.y >= 0) {
+	if (!started[right] && !isBlocked[e] && right.x >= 0 && right.y >= 0) {
 	  prev[right] = p;
 	  started[right] = true;
 	  open.push(right);
