@@ -27,3 +27,14 @@ bool operator<(point3d p1, point3d p2)
     return p1.y < p2.y;
 }
 
+/* operator== - used to compare points (only considers 2d) */
+bool operator==(point3d p1, point3d p2)
+{
+  return p1.x == p2.x && p1.y == p2.y;
+}
+
+/* operator!= - used to compare points (only considers 2d) */
+bool operator!=(point3d p1, point3d p2)
+{
+  return !(p1 == p2);
+}

@@ -30,6 +30,8 @@ typedef pair<point3d, point3d> edge;
 typedef vector<edge> route;
 
 bool operator<(point3d p1, point3d p2);
+bool operator==(point3d p1, point3d p2);
+bool operator!=(point3d p1, point3d p2);
 
 class edgeComp {
  public: 

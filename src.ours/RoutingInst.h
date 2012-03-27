@@ -59,6 +59,14 @@ class RoutingInst
 	/* Find a route for a net */
 	route findRoute(Net&);
 
+	/* Is an edge blocked? */
+	bool isBlocked(edge e);
+
+	/****************************************
+	 *  Routing Algorithms
+	 ****************************************/
+	route bfsRoute(Net &n);
+
 };
 
 #endif // ROUTINGINST_H

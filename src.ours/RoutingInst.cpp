@@ -1,6 +1,7 @@
 #include "RoutingInst.h"
 
 #include <stdio.h>
+#include <queue>
 
 using namespace std;
 
@@ -119,8 +120,8 @@ void RoutingInst::solveRouting()
 route RoutingInst::findRoute(Net &n)
 {
   printf("Finding a route for net %s", n.getName().c_str());
-  route r;
-  return r;
+  
+  return bfsRoute(n);
 }
 
 /* get capacity of edge, initialize if needed */
@@ -157,4 +158,102 @@ bool RoutingInst::isHorizontal(edge e)
   return !isVertical(e);
 }
 
+/* Edges */
+bool RoutingInst::isBlocked(edge e)
+{
+  for (int i = 0; i < blockages.size(); i++)
+    if (blockages[i].first == e)
+      return true;
+  return false;
+}
+
+
+
+/********************************************************************************
+ *  Routing Algorithms
+ ********************************************************************************/
+route RoutingInst::bfsRoute(Net &n)
+{
+  route r;
+  vector<point3d> pins = n.getGPins();
+  for (int i = 0; i < pins.size() - 1; i++) {
+    point3d start = pins[i];
+    point3d goal  = pins[i+1];
+
+    queue<point3d> open;
+    map<point3d, bool> visited;
+    map<point3d, point3d> prev;
+    map<point3d, bool> started;
+
+    // Start at start
+    open.push(start);
+    prev[start] = start;
+    started[start] = true;
+
+    while (!open.empty()) {
+      // Visited?
+      if (visited[open.front()]) {
+	open.pop();
+	continue;
+      }
+
+      // Mark visited
+      point3d p = open.front(); open.pop();
+      visited[p] = true;
+
+      // Goal test
+      if (p == goal) {
+	while (p != start) {
+	  printf("(%d,%d)\n", p.x, p.y);
+	  edge e;
+	  e.first = p;
+	  e.second = prev[p];
+	  r.push_back(e);
+	  p = prev[p];
+	}
+	break;		// Start next pin
+      }
+
+      // Search
+      else {
+	// Create new search points
+	point3d up, left, down, right;
+	up.x = down.x = p.x;
+	left.y = right.y = p.y;
+	up.y = p.y + 1;
+	down.y = p.y - 1;
+	right.x = p.x + 1;
+	left.x = p.x - 1;
+	// Add to search queue
+	edge e;
+	e.first = p;
+	e.second = up;
+	if (!started[up] && !isBlocked(e) && up.x >= 0 && up.y >= 0) {
+	  prev[up] = p;
+	  started[up] = true;
+	  open.push(up);
+	}
+	e.second = down;
+	if (!started[down] && !isBlocked(e) && down.x >= 0 && down.y >= 0) {
+	  prev[down] = p;
+	  started[down] = true;
+	  open.push(down);
+	}
+	e.second = left;
+	if (!started[left] && !isBlocked(e) && left.x >= 0 && left.y >= 0) {
+	  prev[left] = p;
+	  started[left] = true;
+	  open.push(left);
+	}
+	e.second = right;
+	if (!started[right] && !isBlocked(e) && right.x >= 0 && right.y >= 0) {
+	  prev[right] = p;
+	  started[right] = true;
+	  open.push(right);
+	}
+      }
+    }
+  }
+  return r;
+}
 
