@@ -1,6 +1,7 @@
 #include "RoutingInst.h"
 
 #include <stdio.h>
+#include <time.h>
 #include <queue>
 
 using namespace std;
@@ -16,8 +17,6 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   tWidth(tWidth),
   tHeight(tHeight)  
 {
-  
-  
 }
 
 void RoutingInst::addNet(Net n)
@@ -35,32 +34,6 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   b.second = cap;
   blockages.push_back(b);
   isBlocked[e] = true;
-}
-
-void RoutingInst::printInput()
-{
-  printf("grid %d %d %d\n", xGrid, yGrid, zGrid);
-  printf("vertical capacity ");
-  for (int i = 0; i < vCap.size(); i++)
-    printf("%d ", vCap[i]);
-  printf("\nhorizontal capacity ");
-  printf("\nPlacement grid:\n");
-  for (int i = 0; i < hCap.size(); i++)
-    printf("%d ", hCap[i]);
-  printf("\nGlobal routing grid:\n");
-  printf("\n%d %d %d %d\n", llx, lly, tWidth, tHeight);
-  for (int i = 0; i < nets.size(); i++)
-    nets[i].printInput();
-  printf("Blockages:\n");
-  for (vector<blockage>::iterator it = blockages.begin(); it != blockages.end(); it++) {
-    blockage b = *it;
-    edge e = b.first;
-    int cap = b.second;
-    point3d p1 = e.first;
-    point3d p2 = e.second;
-    printf("Blockage: (%d, %d, %d) -> (%d, %d, %d) : %d\n", p1.x, p1.y, p1.z,
-	   p2.x, p2.y, p2.z, cap);
-  }
 }
 
 void RoutingInst::solveRouting()
@@ -84,39 +57,19 @@ void RoutingInst::solveRouting()
     //printf("Setting capacity of edge to %d\n", rcap);
   }
 
-  /*
-  printf("Horizontal capacities:\n");
-  for (int y = 0; y < yGrid; y++) {
-    for (int x = 0; x < xGrid-1; x++) {
-      edge e;
-      e.first.x = x;
-      e.second.x = x+1;
-      e.first.y = y;
-      e.second.y = y;
-      printf("%d ", getCap(e));
-    }
-    printf("\n");
-  }
-  
-  printf("Vertical capacities:\n");
-  for (int y = 0; y < yGrid-1; y++) {
-    for (int x = 0; x < xGrid; x++) {
-      edge e;
-      e.first.x = x;
-      e.second.x = x;
-      e.first.y = y;
-      e.second.y = y+1;
-      printf("%d ", getCap(e));
-    }
-    printf("\n");
-  }
-  */
   printf("Routing %d nets\n", nets.size());
   int ct = 0;
+  time_t start, end;
+  time(&start);
   for (int i = 0; i < nets.size(); i++) {
-    if (!(ct++%100))
-      printf("(%d/%d) nets routed\n", ct, nets.size());
     findRoute(nets[i]);
+
+    /* Status */
+    if (!(++ct%100)) {
+      time(&end);
+      int diff = difftime(end, start);
+      printf("%ds: %d% (%d/%d) nets\t%d rps\n", diff, ct*100/nets.size(), ct, nets.size(), ct/diff);
+    }
   }
 }
 
@@ -247,3 +200,58 @@ route RoutingInst::bfsRoute(Net &n)
   return r;
 }
 
+
+/********************************************************************************
+ *  Debug printing
+ ********************************************************************************/
+
+void RoutingInst::printInput()
+{
+  printf("grid %d %d %d\n", xGrid, yGrid, zGrid);
+  printf("vertical capacity ");
+  for (int i = 0; i < vCap.size(); i++)
+    printf("%d ", vCap[i]);
+  printf("\nhorizontal capacity ");
+  printf("\nPlacement grid:\n");
+  for (int i = 0; i < hCap.size(); i++)
+    printf("%d ", hCap[i]);
+  printf("\nGlobal routing grid:\n");
+  printf("\n%d %d %d %d\n", llx, lly, tWidth, tHeight);
+  for (int i = 0; i < nets.size(); i++)
+    nets[i].printInput();
+  printf("Blockages:\n");
+  for (vector<blockage>::iterator it = blockages.begin(); it != blockages.end(); it++) {
+    blockage b = *it;
+    edge e = b.first;
+    int cap = b.second;
+    point3d p1 = e.first;
+    point3d p2 = e.second;
+    printf("Blockage: (%d, %d, %d) -> (%d, %d, %d) : %d\n", p1.x, p1.y, p1.z,
+	   p2.x, p2.y, p2.z, cap);
+  }
+  printf("Horizontal capacities:\n");
+  for (int y = 0; y < yGrid; y++) {
+    for (int x = 0; x < xGrid-1; x++) {
+      edge e;
+      e.first.x = x;
+      e.second.x = x+1;
+      e.first.y = y;
+      e.second.y = y;
+      printf("%d ", getCap(e));
+    }
+    printf("\n");
+  }
+  
+  printf("Vertical capacities:\n");
+  for (int y = 0; y < yGrid-1; y++) {
+    for (int x = 0; x < xGrid; x++) {
+      edge e;
+      e.first.x = x;
+      e.second.x = x;
+      e.first.y = y;
+      e.second.y = y+1;
+      printf("%d ", getCap(e));
+    }
+    printf("\n");
+  }
+}
