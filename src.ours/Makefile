@@ -51,4 +51,4 @@ Net.o: Net.h Net.cpp
 	$(CCC) $(CCFLAGS) Net.cpp -c
 
 clean:
-	/bin/rm -f *~ *.o ROUTE.exe 
+	/bin/rm -f *~ *.o ROUTE.exe *.out
