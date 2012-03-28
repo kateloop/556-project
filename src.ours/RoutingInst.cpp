@@ -91,6 +91,9 @@ void RoutingInst::printRoute(char *outFile)
 
 route RoutingInst::findRoute(Net &n)
 {
+  printf("================================================================================\n\n");
+  printf("Solving net %s\n", n.getName().c_str());
+
   route r = bfsRoute(n);
 
   // Insert pins on actual z layer
@@ -132,41 +135,6 @@ route RoutingInst::findRoute(Net &n)
     printf("========================================\n\n");
     printf("Solving edge %s\n", edgeToString(e).c_str());
 
-    // Add vias to pins if needed
-    if (e.first == gPins[pin]) {
-      
-      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
-
-      if (e.first.z != gPins[pin].z) {
-	// Connect
-	edge via = makeEdge(gPins[pin], e.first);
-
-	// Insert
-	r.insert(r.begin() + i, via);
-
-        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
-        pin++;
-        i++;
-        continue;
-      }
-    } else if (e.second == gPins[pin]) {
-
-      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
-
-      if (e.second.z != gPins[pin].z) {
-        // Connect
-	edge via = makeEdge(e.second, gPins[pin]);
-
-	// Insert
-	r.insert(r.begin() + i, via);
-
-        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
-        pin++;
-        i++;
-        continue;
-      }
-    }
-
     // Add vias to neighboring edges
     if (i > 0) {		// Not needed on first edge
       edge prev = r[i-1];
@@ -179,8 +147,51 @@ route RoutingInst::findRoute(Net &n)
 	// Insert
 	r.insert(r.begin() + i, via);
         i++;
+        continue;
       }
     }
+
+    // Add vias to pins if needed
+    if (e.first == gPins[pin]) {
+      
+      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
+
+      if (e.first.z != gPins[pin].z) {
+	// Connect
+	edge via = makeEdge(gPins[pin], e.first);
+        edge viaBack = makeEdge(e.first, gPins[pin]);
+
+	// Insert
+	r.insert(r.begin() + i, via);
+	r.insert(r.begin() + i + 1, viaBack);
+
+        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
+        i += 2;                 // Via inserted, move to next edge
+        pin++;                  // Pin detected, move on
+        continue;
+      }
+      pin++;                    // Pin detected, move on
+    } else if (e.second == gPins[pin]) {
+
+      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
+
+      if (e.second.z != gPins[pin].z) {
+        // Connect
+	edge via = makeEdge(e.second, gPins[pin]);
+        edge viaBack = makeEdge(gPins[pin], e.second);
+
+	// Insert
+	r.insert(r.begin() + i + 1, via);
+	r.insert(r.begin() + i + 2, viaBack);
+
+        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
+        i += 3;               // Via inserted, move to next edge
+        pin++;                // Pin detected, move on
+        continue;
+      }
+      pin++;                // Pin detected, move on
+    }
+
   }
   return r;
 }
