@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <queue>
+#include <stack>
 
 using namespace std;
 
@@ -94,7 +95,7 @@ route RoutingInst::findRoute(Net &n)
 
   // Insert pins on actual z layer
   vector<point3d> gPins = n.getGPins();
-  int pin = gPins.size()-1; // Pin we are working on
+  int pin = 0; // Pin we are working on
 
   for (int i = 0; i < gPins.size(); i++)
     printf("%d %d\n", gPins[i].x, gPins[i].y);
@@ -134,7 +135,7 @@ route RoutingInst::findRoute(Net &n)
     // Add vias to pins if needed
     if (e.first == gPins[pin]) {
       
-      printf("Edge.first %s is a pin\n", edgeToString(e).c_str());
+      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
 
       if (e.first.z != gPins[pin].z) {
 	// Connect
@@ -142,12 +143,15 @@ route RoutingInst::findRoute(Net &n)
 
 	// Insert
 	r.insert(r.begin() + i, via);
+
+        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
+        pin++;
+        i++;
+        continue;
       }
-      i++;
-      pin--;
     } else if (e.second == gPins[pin]) {
 
-      printf("Edge.second %s is a pin\n", edgeToString(e).c_str());
+      printf("(%d,%d,%d) is a pin\n", gPins[pin].x, gPins[pin].y, gPins[pin].z);
 
       if (e.second.z != gPins[pin].z) {
         // Connect
@@ -155,25 +159,26 @@ route RoutingInst::findRoute(Net &n)
 
 	// Insert
 	r.insert(r.begin() + i, via);
+
+        printf("Z doesn't match, adding via %s\n", edgeToString(via).c_str());
+        pin++;
+        i++;
+        continue;
       }
-      i++;
-      pin--;
     }
 
     // Add vias to neighboring edges
     if (i > 0) {		// Not needed on first edge
       edge prev = r[i-1];
       if (prev.second.z != e.first.z) { // Via needed
-	edge via;
 	// Connect
-	via.first.x = prev.second.x;
-	via.first.y = prev.second.y;
-	via.first.z = prev.second.z;
-	via.second.x = e.first.x;
-	via.second.y = e.first.y;
-	via.second.z = e.first.z;
+	edge via = makeEdge(prev.second, e.first);
+
+        printf("Prev.second.z != e.first.z, adding via %s\n", edgeToString(via).c_str());
+
 	// Insert
 	r.insert(r.begin() + i, via);
+        i++;
       }
     }
   }
@@ -248,14 +253,21 @@ route RoutingInst::bfsRoute(Net &n)
 
       // Goal test
       if (p == goal) {
+        stack<edge> s;
+
 	while (p != start) {
 	  //printf("(%d,%d)\n", p.x, p.y);
 	  edge e;
-	  e.first = p;
-	  e.second = prev[p];
-	  r.push_back(e);
+	  e.first = prev[p];
+	  e.second = p;
+          s.push(e);
 	  p = prev[p];
 	}
+        while (!s.empty()) {
+          r.push_back(s.top());
+          s.pop();
+        }
+
 	break;		// Start next pin
       }
 

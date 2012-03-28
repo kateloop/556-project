@@ -42,6 +42,7 @@ edge makeEdge(point3d p1, point3d p2)
   e.second.x = p2.x;
   e.second.y = p2.y;
   e.second.z = p2.z;
+  return e;
 }
 
 string edgeToString(edge e)
