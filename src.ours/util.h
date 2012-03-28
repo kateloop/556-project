@@ -3,9 +3,12 @@
 
 #include <utility>
 #include <vector>
+#include <stdio.h>
+#include <string>
 
 using std::vector;
 using std::pair;
+using std::string;
 
  /**
   * A structure to represent a 3D Point. 
@@ -42,10 +45,19 @@ class edgeComp {
 };
 
 
+/********************************************************************************
+ *    Placement/Routing conversion
+ ********************************************************************************/
 /* Placement routing grid coordinates to global routing grid */
 point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight);
 
 /* Routing grid to placement grid */
 point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight);
+
+/********************************************************************************
+ *   Edges
+ ********************************************************************************/
+edge makeEdge(point3d p1, point3d p2);
+string edgeToString(edge e);
 
 #endif

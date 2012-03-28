@@ -8,6 +8,9 @@
 
 using std::floor;
 
+/********************************************************************************
+ *    Placement/Routing conversion
+ ********************************************************************************/
 point3d ptog(point3d p, int llx, int lly, int tWidth, int tHeight)
 {
   point3d g;
@@ -26,6 +29,28 @@ point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight)
   return p;
 }
 
+/********************************************************************************
+ *   Edges
+ ********************************************************************************/
+edge makeEdge(point3d p1, point3d p2)
+{
+  edge e;
+  e.first.x = p1.x;
+  e.first.y = p1.y;
+  e.first.z = p1.z;
+
+  e.second.x = p2.x;
+  e.second.y = p2.y;
+  e.second.z = p2.z;
+}
+
+string edgeToString(edge e)
+{
+  char buff[80];
+  sprintf(buff, "(%d,%d,%d)-(%d,%d,%d)", e.first.x, e.first.y, e.first.z,
+          e.second.x, e.second.y, e.second.z);
+  return string(buff);
+}
 
 /* operator< - used to compare points (only considers 2d) */
 bool operator<(point3d p1, point3d p2)

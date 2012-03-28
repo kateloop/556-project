@@ -96,6 +96,9 @@ route RoutingInst::findRoute(Net &n)
   vector<point3d> gPins = n.getGPins();
   int pin = gPins.size()-1; // Pin we are working on
 
+  for (int i = 0; i < gPins.size(); i++)
+    printf("%d %d\n", gPins[i].x, gPins[i].y);
+
   // Find vertical and horizontal layers
   int vLayer, hLayer;
   for (int i = 0; i < vCap.size(); i++) {
@@ -124,34 +127,36 @@ route RoutingInst::findRoute(Net &n)
       e.second.z = hLayer;      
     }
 
+    // DEBUG
+    printf("========================================\n\n");
+    printf("Solving edge %s\n", edgeToString(e).c_str());
+
     // Add vias to pins if needed
     if (e.first == gPins[pin]) {
+      
+      printf("Edge.first %s is a pin\n", edgeToString(e).c_str());
+
       if (e.first.z != gPins[pin].z) {
-	edge via;
 	// Connect
-	via.first.x = e.first.x;
-	via.first.y = e.first.y;
-	via.first.z = e.first.z;
-	via.second.x = gPins[pin].x;
-	via.second.y = gPins[pin].y;
-	via.second.z = gPins[pin].z;
+	edge via = makeEdge(gPins[pin], e.first);
+
 	// Insert
 	r.insert(r.begin() + i, via);
       }
+      i++;
       pin--;
     } else if (e.second == gPins[pin]) {
+
+      printf("Edge.second %s is a pin\n", edgeToString(e).c_str());
+
       if (e.second.z != gPins[pin].z) {
-	edge via;
-	// Connect
-	via.first.x = e.second.x;
-	via.first.y = e.second.y;
-	via.first.z = e.second.z;
-	via.second.x = gPins[pin].x;
-	via.second.y = gPins[pin].y;
-	via.second.z = gPins[pin].z;
+        // Connect
+	edge via = makeEdge(e.second, gPins[pin]);
+
 	// Insert
 	r.insert(r.begin() + i, via);
       }
+      i++;
       pin--;
     }
 
