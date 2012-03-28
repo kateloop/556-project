@@ -91,15 +91,18 @@ route RoutingInst::findRoute(Net &n)
 {
   route r = bfsRoute(n);
 
+  // Insert pins on actual z layer
+  vector<point3d> gPins = n.getGPins();
+  int pin = gPins.size()-1; // Pin we are working on
+
+  // Find vertical and horizontal layers
   int vLayer, hLayer;
-  
   for (int i = 0; i < vCap.size(); i++) {
     if (vCap[i]) {
       vLayer = i;
       break;
     }
   }
-  
   for (int i = 0; i < hCap.size(); i++) {
     if (hCap[i]) {
       hLayer = i;
@@ -107,9 +110,10 @@ route RoutingInst::findRoute(Net &n)
     }
   }
 
-  // Add vias and change layers as needed
+  // Add vias, move edges to correct layer, insert pins
   for (int i = 0; i < r.size(); i++) {
     edge &e = r[i];
+
     // Set layer
     if (isVertical(e)) {
       e.first.z = vLayer;
@@ -119,7 +123,38 @@ route RoutingInst::findRoute(Net &n)
       e.second.z = hLayer;      
     }
 
-    // Add vias
+    // Add vias to pins if needed
+    if (e.first == gPins[pin]) {
+      if (e.first.z != gPins[pin].z) {
+	edge via;
+	// Connect
+	via.first.x = e.first.x;
+	via.first.y = e.first.y;
+	via.first.z = e.first.z;
+	via.second.x = gPins[pin].x;
+	via.second.y = gPins[pin].y;
+	via.second.z = gPins[pin].z;
+	// Insert
+	r.insert(r.begin() + i, via);
+      }
+      pin--;
+    } else if (e.second == gPins[pin]) {
+      if (e.second.z != gPins[pin].z) {
+	edge via;
+	// Connect
+	via.first.x = e.second.x;
+	via.first.y = e.second.y;
+	via.first.z = e.second.z;
+	via.second.x = gPins[pin].x;
+	via.second.y = gPins[pin].y;
+	via.second.z = gPins[pin].z;
+	// Insert
+	r.insert(r.begin() + i, via);
+      }
+      pin--;
+    }
+
+    // Add vias to neighboring edges
     if (i > 0) {		// Not needed on first edge
       edge prev = r[i-1];
       if (prev.second.z != e.first.z) { // Via needed
