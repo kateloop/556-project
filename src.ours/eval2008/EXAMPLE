@@ -1,0 +1,16 @@
+
+There are 1 input file and 2 solution files in this zipped file.
+You can run eval2008.pl with these files. Assume you are using Linux/Unix, you
+should be able to get the following results.
+
+Notes: As you can see, although solution 3ds1 have more wirelength than 3ds2,
+3ds1 is superior to 3ds2 because it has less total-overflow.
+
+$ eval2008.pl 3d.txt 3ds1.txt
+File Names(In, Out)                         Tot OF       Max OF             WL
+3d.txt, 3ds1.txt                                 0            0             14
+$ eval2008.pl 3d.txt 3ds2.txt
+File Names(In, Out)                         Tot OF       Max OF             WL
+3d.txt, 3ds2.txt                                 1            1              2
+
+You can also do "eval2008.pl -h" for more information.
