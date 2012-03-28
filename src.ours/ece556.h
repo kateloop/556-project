@@ -39,7 +39,7 @@ using namespace std;
   */
 
 
-int readBenchmark(const char *fileName, RoutingInst *rst);
+RoutingInst* readBenchmark(const char *fileName);
   /*! \fn int release(routingInst *rst)
     	\brief Release the memory for all the allocated data structures. 
 	       Failure to release will likely cause memory problems after multiple runs of your program. 

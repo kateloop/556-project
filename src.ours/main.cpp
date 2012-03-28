@@ -21,16 +21,18 @@ int main(int argc, char **argv)
 
  	int status;
 	char *inputFileName = argv[1];
- 	//char *outputFileName = argv[2];
+ 	char *outputFileName = argv[2];
 
-	RoutingInst *rst = NULL;
+	RoutingInst *rst;
 
  	/// read benchmark
- 	status = readBenchmark(inputFileName, rst);
- 	if (status) {
-	  printf("ERROR: reading input file \n");
-	  return 1;
- 	}
+ 	rst = readBenchmark(inputFileName);
+
+	// solve routing
+	rst->solveRouting();
+
+	// print result to file
+	rst->printRoute(outputFileName);
 
 	/*
 	

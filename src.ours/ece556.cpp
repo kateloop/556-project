@@ -10,12 +10,13 @@
 
 #include "ece556.h"
 
-int readBenchmark(const char *fileName, RoutingInst *rst){
+RoutingInst* readBenchmark(const char *fileName) {
   ifstream inf;
   inf.open(fileName, ifstream::in);
 
+  RoutingInst *rst;
   int xGrid, yGrid, zGrid;	// Global routing grid dimensions
-  vector<int> vCap, hCap;       // Default vertical and horizontal capacity for each layer 
+  vector<int> *vCap, *hCap;       // Default vertical and horizontal capacity for each layer 
   int llx, lly;			// Lower left {x,y} for global routing grid
   int tWidth, tHeight;		// Tile width/height of a bin
   int numNets;			// Number of nets
@@ -27,25 +28,27 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
 
   // Vertical capacities
   inf >> dummy >> dummy;
+  vCap = new vector<int>();
   for (int i = 0; i < zGrid; i++) {
     int cap;
     inf >> cap;
-    vCap.push_back(cap);
+    vCap->push_back(cap);
   }
 
   // Horizontal capacities
   inf >> dummy >> dummy;
+  hCap = new vector<int>();
   for (int i = 0; i < zGrid; i++) {
     int cap;
     inf >> cap;
-    hCap.push_back(cap);
+    hCap->push_back(cap);
   }
 
   // LLX, LLY, tWidth, tHeight
   inf >> llx >> lly >> tWidth >> tHeight;  
 
   // Make a new instance
-  rst = new RoutingInst(xGrid, yGrid, zGrid, vCap, hCap, llx, lly, tWidth, tHeight);
+  rst = new RoutingInst(xGrid, yGrid, zGrid, *vCap, *hCap, llx, lly, tWidth, tHeight);
 
   // Parse nets
   inf >> dummy >> dummy >> numNets;
@@ -56,12 +59,12 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     int netSize;		// Ignored
     inf >> netName >> netId >> numPins >> netSize;
 
-    Net n(netName, netId, numPins, llx, lly, tWidth, tHeight);
+    Net *n = new Net(netName, netId, numPins, llx, lly, tWidth, tHeight);
     // Parse pins
     for (int j = 0; j < numPins; j++) {
       point3d p;
       inf >> p.x >> p.y >> p.z;
-      n.addPin(p);
+      n->addPin(p);
     }
     rst->addNet(n);
   }
@@ -79,10 +82,7 @@ int readBenchmark(const char *fileName, RoutingInst *rst){
     rst->addBlockage(p1, p2, cap);
   }
 
-  //rst->printInput();
-
-  rst->solveRouting();
-  return 0;
+  return rst;
 }
 
 

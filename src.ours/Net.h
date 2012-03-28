@@ -40,7 +40,7 @@ class Net {
   string getName();
 
   /* Output */
-  void printRoute();
+  void printRoute(FILE *of);
 
   /* Get global routing grid pins */
   vector<point3d> &getGPins();

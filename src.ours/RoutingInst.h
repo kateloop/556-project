@@ -25,10 +25,11 @@ class RoutingInst
   RoutingInst (int xGrid_in, int yGrid_in, int zGrid_in, vector<int> &vCap_in, vector<int> &hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
   
   /*Public functions*/
-  void addNet (Net n);
+  void addNet (Net *n);
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
   void solveRouting();
+  void printRoute(char *outFile);
 
  private:
   /****************************************

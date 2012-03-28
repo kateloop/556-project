@@ -20,7 +20,7 @@ void Net::addPin(point3d pin)
   gPins.push_back(ptog(pin, llx, lly, tWidth, tHeight));
 }
 
-void Net::printRoute()
+void Net::printRoute(FILE *of)
 {
   if (!routes.size()) {
     printf("ERR: printRoute called on Net without route\n");
@@ -29,16 +29,16 @@ void Net::printRoute()
   
   route r = routes[0];
 
-  printf("%s %d %d\n", name.c_str(), id, r.size());
+  fprintf(of, "%s %d %d\n", name.c_str(), id, r.size());
   
   for (int i = 0; i < r.size(); i++) {
     edge e = r[i];
     point3d p1 = gtop(e.first, llx, lly, tWidth, tHeight);
     point3d p2 = gtop(e.second, llx, lly, tWidth, tHeight);
-    printf("(%d,%d,%d)-(%d,%d,%d)\n", p1.x, p1.y, p1.z,
+    fprintf(of, "(%d,%d,%d)-(%d,%d,%d)\n", p1.x, p1.y, p1.z,
 	   p2.x, p2.y, p2.z);
   }
-  printf("!\n");
+  fprintf(of, "!\n");
 }
 
 void Net::printInput()

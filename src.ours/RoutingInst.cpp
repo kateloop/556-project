@@ -15,13 +15,13 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   llx(llx),
   lly(lly),
   tWidth(tWidth),
-  tHeight(tHeight)  
+  tHeight(tHeight)
 {
 }
 
-void RoutingInst::addNet(Net n)
+void RoutingInst::addNet(Net *n)
 {
-  nets.push_back(n);
+  nets.push_back(*n);
 }
 
 void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
@@ -75,10 +75,15 @@ void RoutingInst::solveRouting()
       time(&last);
     }
   }
+}
+
+void RoutingInst::printRoute(char *outFile)
+{
+  FILE *of = fopen(outFile, "w");
 
   // Done - write to file
   for (int i = 0; i < nets.size(); i++) {
-    nets[i].printRoute();
+    nets[i].printRoute(of);
   }
 }
 
