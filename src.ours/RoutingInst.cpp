@@ -71,7 +71,8 @@ void RoutingInst::solveRouting()
       time(&end);
       int elapsed = difftime(end, start);
       int diff = difftime(end, last);
-      printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, ct*100/nets.size(), ct, nets.size(), res/diff, (nets.size() - ct) / (res/diff) / 60);
+      if (diff > 0)
+	printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, ct*100/nets.size(), ct, nets.size(), res/diff, (nets.size() - ct) / (res/diff) / 60);
       time(&last);
     }
   }
