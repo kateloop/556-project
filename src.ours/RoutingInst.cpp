@@ -98,6 +98,7 @@ route RoutingInst::findRoute(Net &n)
 
   // Need a list of pins to add vias from our route
   vector<point3d> gPins = n.getGPins();
+
   int pin = 0; // Pin we are working on
 
   // DEBUG
@@ -121,7 +122,7 @@ route RoutingInst::findRoute(Net &n)
   }
 
   // Insert necessary vias between edges and to pins
-  for (int i = 0; i < r.size(); i++) {
+  for (int i = 0; i < r.size();) {
     edge &e = r[i];
 
     // Set layer for this type of edge
@@ -154,8 +155,9 @@ route RoutingInst::findRoute(Net &n)
         r.insert(r.begin(), via);
         pin++;
         continue;
+      } else {
+        pin++;
       }
-      pin++;
     }
 
     // If the previous edge was on a different layer, add a via
@@ -193,7 +195,9 @@ route RoutingInst::findRoute(Net &n)
                edgeToString(viaBack).c_str());
       }
       pin++;                // Pin detected, move on
+      continue;
     }
+    i++;
   }
   return r;
 }
