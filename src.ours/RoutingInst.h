@@ -33,8 +33,8 @@ class RoutingInst
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
   void solveRouting();
-private:
-  void solveRouting(int modulo, int threads);
+
+  friend void *doRoutingTask(void *);
   
 
   /****************************************
@@ -93,3 +93,14 @@ private:
 };
 
 #endif // ROUTINGINST_H
+
+
+
+/* Threaded routing task */
+typedef struct {
+  RoutingInst *rst;
+  int modulo;
+  int threads;
+} routeTask;
+
+void *doRoutingTask(void *);    
