@@ -91,6 +91,7 @@ class RoutingInst
    *  Routing Algorithms
    ****************************************/
   route bfsRoute(Net &n);
+  route bfs(point3d start, point3d goal);
 
   /* Get neighboring points */
   set<point3d> getNeighborPoints(point3d p);

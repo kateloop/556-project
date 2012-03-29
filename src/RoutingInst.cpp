@@ -232,65 +232,76 @@ route RoutingInst::bfsRoute(Net &n)
   route r;
   vector<point3d> pins = n.getGPins();
   for (int i = 0; i < pins.size() - 1; i++) {
+    // Route this pin pair
     point3d start = pins[i];
     point3d goal  = pins[i+1];
+    route cur = bfs(start, goal);
 
-    queue<point3d> open;
-    map<point3d, bool> visited;
-    map<point3d, point3d> prev;
-    map<point3d, bool> started;
+    // Append to Net's route
+    for (int j = 0; j < cur.size(); j++)
+      r.push_back(cur[j]);
+  }
+  return r;
+}
 
-    // Start at start
-    open.push(start);
-    prev[start] = start;
-    started[start] = true;
-
-    while (!open.empty()) {
-      // Visited?
-      if (visited[open.front()]) {
-	open.pop();
-	continue;
+route RoutingInst::bfs(point3d start, point3d goal)
+{
+  route r;
+  queue<point3d> open;
+  map<point3d, bool> visited;
+  map<point3d, point3d> prev;
+  map<point3d, bool> started;
+  
+  // Start at start
+  open.push(start);
+  prev[start] = start;
+  started[start] = true;
+  
+  while (!open.empty()) {
+    // Visited?
+    if (visited[open.front()]) {
+      open.pop();
+      continue;
+    }
+    
+    // Mark visited
+    point3d p = open.front(); open.pop();
+    visited[p] = true;
+    
+    // Goal test
+    if (p == goal) {
+      stack<edge> s;
+      
+      // Retrace and reverse
+      while (p != start) {
+        //printf("(%d,%d)\n", p.x, p.y);
+        edge e;
+        e.first = prev[p];
+        e.second = p;
+        s.push(e);
+        p = prev[p];
       }
-
-      // Mark visited
-      point3d p = open.front(); open.pop();
-      visited[p] = true;
-
-      // Goal test
-      if (p == goal) {
-        stack<edge> s;
-
-        // Retrace and reverse
-	while (p != start) {
-	  //printf("(%d,%d)\n", p.x, p.y);
-	  edge e;
-	  e.first = prev[p];
-	  e.second = p;
-          s.push(e);
-	  p = prev[p];
-	}
-        while (!s.empty()) {
-          r.push_back(s.top());
-          s.pop();
-        }
-	break;		// Start next pin
+      while (!s.empty()) {
+        r.push_back(s.top());
+        s.pop();
       }
-
-      // Search
-      else {
-        // Add new edges to search
-        set<point3d> nextPoints = getNeighborPoints(p);
-
-        for (set<point3d>::iterator it = nextPoints.begin(); it != nextPoints.end(); it++) {
-          edge e = makeEdge(p, *it);
-          if (!started[*it] &&
-              !isBlocked[e] &&
-              (*it).x >= 0  &&
-              (*it).y >= 0) {
-            prev[*it] = p;
-            started[*it] = true;
-            open.push(*it);
-          }
+      break;		// Start next pin
+    }
+    
+    // Search
+    else {
+      // Add new edges to search
+      set<point3d> nextPoints = getNeighborPoints(p);
+      
+      for (set<point3d>::iterator it = nextPoints.begin(); it != nextPoints.end(); it++) {
+        edge e = makeEdge(p, *it);
+        if (!started[*it] &&
+            !isBlocked[e] &&
+            (*it).x >= 0  &&
+            (*it).y >= 0) {
+          prev[*it] = p;
+          started[*it] = true;
+          open.push(*it);
         }
       }
     }
