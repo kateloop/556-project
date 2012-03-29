@@ -50,12 +50,18 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   setCap(e, rcap);
 }
 
-#define NUMTHREADS 1
+
+/********************************************************************************
+ *  solveRouting - Prepares routing tasks to solve this routing instance
+ ********************************************************************************/
+#define MAXTHREADS 100
+int NUMTHREADS = 4;
+
 void RoutingInst::solveRouting()
 {
-  pthread_t threads[NUMTHREADS];
-  int iret[NUMTHREADS];
-  routeTask tasks[NUMTHREADS];
+  pthread_t threads[MAXTHREADS];
+  int iret[MAXTHREADS];
+  routeTask tasks[MAXTHREADS];
 
   printf("Routing %d nets\n", nets.size());
   for (int i = 0; i < NUMTHREADS; i++) {
@@ -63,7 +69,9 @@ void RoutingInst::solveRouting()
     tasks[i].rst = this;
     tasks[i].modulo = i;
     tasks[i].threads = NUMTHREADS;
-    iret[i] = pthread_create(&threads[i], NULL, &doRoutingTask, (void *)&tasks[i]);
+    if (iret[i] = pthread_create(&threads[i], NULL, &doRoutingTask, (void *)&tasks[i])) {
+      perror("Creating threads\n");
+    }
   }
 
   for (int i = 0; i < NUMTHREADS; i++)

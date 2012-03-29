@@ -28,11 +28,11 @@ make
 # Run it
 echo $0: Routing...
 echo
-./ROUTE.exe $1 $1.out
+time ./ROUTE.exe $1 $1.out
 
 # Check the output
 if [ -f $1.out ]; then
     echo $0: Running testbench...
     echo
-    ./eval2008/eval2008.pl $2 $1.out
+    time ./eval2008/eval2008.pl $2 $1.out
 fi

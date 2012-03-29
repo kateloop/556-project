@@ -10,18 +10,28 @@
 */
 
 #include "ece556.h"
+#include <stdlib.h>
+
+extern int NUMTHREADS;
 
 int main(int argc, char **argv)
 {
 
- 	if(argc!=3){
- 		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> \n");
+ 	if(argc != 3 && 
+           argc != 4){
+ 		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> [numThreads]\n");
  		return 1;
  	}
 
  	int status;
 	char *inputFileName = argv[1];
  	char *outputFileName = argv[2];
+
+        if (argc == 4) {
+          NUMTHREADS = atoi(argv[3]);
+          printf("Running with %d threads\n", NUMTHREADS);
+        }
+
 
 	RoutingInst *rst;
 
