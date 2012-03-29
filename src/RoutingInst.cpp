@@ -273,15 +273,13 @@ route RoutingInst::bfsRoute(Net &n)
           r.push_back(s.top());
           s.pop();
         }
-
 	break;		// Start next pin
       }
 
       // Search
       else {
         // Add new edges to search
-        set<point3d> nextPoints;
-        getNeighborPoints(p, nextPoints);
+        set<point3d> nextPoints = getNeighborPoints(p);
 
         for (set<point3d>::iterator it = nextPoints.begin(); it != nextPoints.end(); it++) {
           edge e = makeEdge(p, *it);
@@ -383,8 +381,9 @@ void RoutingInst::printGPins(vector<point3d> &gPins) {
     printf("%d, %d, %d\n", gPins[i].x, gPins[i].y, gPins[i].z);
 }
 
-void RoutingInst::getNeighborPoints(point3d p, set<point3d> &pts)
+set<point3d> RoutingInst::getNeighborPoints(point3d p)
 {
+  set<point3d> pts;
   point3d up, left, down, right;
   up.x = down.x = p.x;          // Up/Down    same X
   left.y = right.y = p.y;       // Left/Right same Y
@@ -397,4 +396,6 @@ void RoutingInst::getNeighborPoints(point3d p, set<point3d> &pts)
   pts.insert(left);
   pts.insert(down);
   pts.insert(right);
+
+  return pts;
 }

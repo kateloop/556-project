@@ -93,7 +93,7 @@ class RoutingInst
   route bfsRoute(Net &n);
 
   /* Get neighboring points */
-  void getNeighborPoints(point3d p, set<point3d> &pts);
+  set<point3d> getNeighborPoints(point3d p);
 
 };
 
