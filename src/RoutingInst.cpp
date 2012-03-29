@@ -238,8 +238,22 @@ route RoutingInst::bfsRoute(Net &n)
     route cur = bfs(start, goal);
 
     // Append to Net's route
-    for (int j = 0; j < cur.size(); j++)
-      r.push_back(cur[j]);
+    for (int j = 0; j < cur.size(); j++) {
+      edge e = cur[j];
+      if (j == 0) {
+        // Don't merge pins
+        r.push_back(e);
+      } else {
+        // Merge consecutive edges
+        edge prev = r[r.size()-1];
+        if ((isHorizontal(e) && isHorizontal(prev)) ||
+            (isVertical(e)   && isVertical(prev))) {
+          r[r.size()-1].second = e.second;
+        } else {
+          r.push_back(e);
+        }
+      }
+    }
   }
   return r;
 }
