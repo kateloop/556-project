@@ -23,18 +23,20 @@ class RoutingInst
    *  Public access
    ****************************************/
   RoutingInst (int xGrid_in, int yGrid_in, int zGrid_in, vector<int> &vCap_in, vector<int> &hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
-  
-  /*Public functions*/
-  void addNet (Net *n);
-  void addBlockage(point3d p1, point3d p2, int cap);
-  void printInput();
-  void solveRouting();
 
   /* Printing functions */
   void printRoute(char *outFile);
   void printGPins(vector<point3d> &gPins);
 
- private:
+  /*Public functions*/
+  void addNet (Net *n);
+  void addBlockage(point3d p1, point3d p2, int cap);
+  void printInput();
+  void solveRouting();
+private:
+  void solveRouting(int modulo, int threads);
+  
+
   /****************************************
    *  Problem size definition
    ****************************************/

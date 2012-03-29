@@ -50,25 +50,36 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 
 void RoutingInst::solveRouting()
 {
+  int noThreads = 10;
   printf("Routing %d nets\n", nets.size());
+
+  for (int i = 0; i < noThreads; i++) {
+    solveRouting(i, noThreads);
+  }
+}
+
+void RoutingInst::solveRouting(int modulo, int threads)
+{
   int ct = 0;
   const int res = 500;
   time_t start, last, end;
   time(&start);
   time(&last);
   for (int i = 0; i < nets.size(); i++) {
-    route r = findRoute(nets[i]);
-
-    nets[i].addRoute(r);
-
-    /* Status */
-    if (!(++ct % res)) {
-      time(&end);
-      int elapsed = difftime(end, start);
-      int diff = difftime(end, last);
-      if (diff > 0)
-	printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, ct*100/nets.size(), ct, nets.size(), res/diff, (nets.size() - ct) / (res/diff) / 60);
-      time(&last);
+    if (i % threads == modulo) {
+      route r = findRoute(nets[i]);
+      
+      nets[i].addRoute(r);
+      
+      /* Status */
+      if (!(++ct % res)) {
+        time(&end);
+        int elapsed = difftime(end, start);
+        int diff = difftime(end, last);
+        if (diff > 0)
+          printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, ct*100/nets.size(), ct, nets.size(), res/diff, (nets.size() - ct) / (res/diff) / 60);
+        time(&last);
+      }
     }
   }
 }
