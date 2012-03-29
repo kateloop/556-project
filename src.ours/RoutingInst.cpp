@@ -35,29 +35,21 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   b.second = cap;
   blockages.push_back(b);
   isBlocked[e] = true;
+
+  // Adjust capacities for this edge
+  int rcap = getCap(e);
+  if (isVertical(e)) {
+    rcap -= vCap[e.first.z - 1]; // z index starts at 1..
+    rcap += cap;
+  } else { // horizontal
+    rcap -= hCap[e.first.z - 1]; // z index starts at 1..
+    rcap += cap;
+  }
+  setCap(e, rcap);
 }
 
 void RoutingInst::solveRouting()
 {
-  /* Make blockage adjustments */
-  for (int i = 0; i < blockages.size(); i++) {
-    // Pull out blockage fields
-    blockage b = blockages[i];
-    edge e = b.first;
-    int bcap = b.second;
-    // Get routed capcacity
-    int rcap = getCap(e);
-    if (isVertical(e)) {
-      rcap -= vCap[e.first.z - 1]; // z index starts at 1..
-      rcap += bcap;
-    } else { // horizontal
-      rcap -= hCap[e.first.z - 1]; // z index starts at 1..
-      rcap += bcap;
-    }
-    setCap(e, rcap);
-    //printf("Setting capacity of edge to %d\n", rcap);
-  }
-
   printf("Routing %d nets\n", nets.size());
   int ct = 0;
   const int res = 500;
@@ -65,7 +57,9 @@ void RoutingInst::solveRouting()
   time(&start);
   time(&last);
   for (int i = 0; i < nets.size(); i++) {
-    nets[i].addRoute(findRoute(nets[i]));
+    route r = findRoute(nets[i]);
+
+    nets[i].addRoute(r);
 
     /* Status */
     if (!(++ct % res)) {
