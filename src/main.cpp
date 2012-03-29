@@ -10,12 +10,16 @@
 */
 
 #include "ece556.h"
+#include <stdlib.h>
+
+extern int NUMTHREADS;
 
 int main(int argc, char **argv)
 {
 
- 	if(argc!=3){
- 		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> \n");
+ 	if(argc != 3 && 
+           argc != 4){
+ 		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> [numThreads]\n");
  		return 1;
  	}
 
@@ -23,15 +27,24 @@ int main(int argc, char **argv)
 	char *inputFileName = argv[1];
  	char *outputFileName = argv[2];
 
- 	/// create a new routing instance
- 	routingInst *rst = new routingInst;
-	
+        if (argc == 4) {
+          NUMTHREADS = atoi(argv[3]);
+          printf("Running with %d threads\n", NUMTHREADS);
+        }
+
+
+	RoutingInst *rst;
+
  	/// read benchmark
- 	status = readBenchmark(inputFileName, rst);
- 	if(status==0){
- 		printf("ERROR: reading input file \n");
- 		return 1;
- 	}
+ 	rst = readBenchmark(inputFileName);
+
+	// solve routing
+	rst->solveRouting();
+
+	// print result to file
+	rst->printRoute(outputFileName);
+
+	/*
 	
  	/// project into 2D
  	status = projectTo2D(rst);
@@ -56,8 +69,11 @@ int main(int argc, char **argv)
  		release(rst);
  		return 1;
  	}
+	*/
 
+	/*
  	release(rst);
+	*/
  	printf("\nDONE!\n");	
  	return 0;
 }
