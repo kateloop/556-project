@@ -102,24 +102,13 @@ route RoutingInst::findRoute(Net &n)
   int pin = 0; // Pin we are working on
 
   // DEBUG
-  for (int i = 0; i < gPins.size(); i++)
-    printf("%d, %d, %d\n", gPins[i].x, gPins[i].y, gPins[i].z);
+  printGPins(gPins);
   // DEBUG
 
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
-  for (int i = 0; i < vCap.size(); i++) {
-    if (vCap[i]) {
-      vLayer = i;
-      break;
-    }
-  }
-  for (int i = 0; i < hCap.size(); i++) {
-    if (hCap[i]) {
-      hLayer = i;
-      break;
-    }
-  }
+  vLayer = getVLayer();
+  hLayer = getHLayer();
 
   // Insert necessary vias between edges and to pins
   for (int i = 0; i < r.size();) {
@@ -142,14 +131,16 @@ route RoutingInst::findRoute(Net &n)
 
     if (i > 0)
       printf("Previous edge %s\n", edgeToString(r[i-1]).c_str());
+    printf("Current pin: (%d, %d, %d)", gPins[pin].x, gPins[pin].y, gPins[pin].z);
 
     // Connect the first pin
-    if (pin == 0) {
+    if (e.first == gPins[pin]) {
+      printf("First pin: (%d,%d,%d)", gPins[pin].x, gPins[pin].y, gPins[pin].z);
       if (e.first.z != gPins[pin].z) {
         // Connect
         edge via = makeEdge(gPins[pin], e.first);
         
-        printf("Pin1 z layer does not match first edge, adding via %s\n", edgeToString(via).c_str());
+        printf("Pin z layer does not match first edge, adding via %s\n", edgeToString(via).c_str());
         
         // Insert via, then try again
         r.insert(r.begin(), via);
@@ -157,6 +148,7 @@ route RoutingInst::findRoute(Net &n)
         continue;
       } else {
         pin++;
+        continue;               // in case the next pin is here also
       }
     }
 
@@ -385,4 +377,31 @@ void RoutingInst::printInput()
     }
     printf("\n");
   }
+}
+
+int RoutingInst::getVLayer() {
+  int vLayer = -1;
+  for (int i = 0; i < vCap.size(); i++) {
+    if (vCap[i]) {
+      vLayer = i;
+      break;
+    }
+  }
+  return vLayer;
+}
+
+int RoutingInst::getHLayer() {
+  int hLayer = -1;
+  for (int i = 0; i < hCap.size(); i++) {
+    if (hCap[i]) {
+      hLayer = i;
+      break;
+    }
+  }
+  return hLayer;
+}
+
+void RoutingInst::printGPins(vector<point3d> &gPins) {
+  for (int i = 0; i < gPins.size(); i++)
+    printf("%d, %d, %d\n", gPins[i].x, gPins[i].y, gPins[i].z);
 }

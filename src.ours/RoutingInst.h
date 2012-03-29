@@ -29,7 +29,10 @@ class RoutingInst
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
   void solveRouting();
+
+  /* Printing functions */
   void printRoute(char *outFile);
+  void printGPins(vector<point3d> &gPins);
 
  private:
   /****************************************
@@ -73,6 +76,9 @@ class RoutingInst
   /* Is an edge vertical or horizontal */
   bool isVertical(edge e);
   bool isHorizontal(edge e);
+  /* Get a suitable vertical or horizontal layer */
+  int getVLayer();
+  int getHLayer();
 
   /* Find a route for a net */
   route findRoute(Net&);
