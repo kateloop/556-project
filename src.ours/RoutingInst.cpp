@@ -50,7 +50,7 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   setCap(e, rcap);
 }
 
-#define NUMTHREADS 16
+#define NUMTHREADS 1
 void RoutingInst::solveRouting()
 {
   pthread_t threads[NUMTHREADS];
@@ -84,10 +84,6 @@ void *doRoutingTask(void *task)
   printf("Routing %d, %d\n", modulo, threads);
   fflush(stdout);
 
-  const int res = 500;
-  time_t start, last, end;
-  time(&start);
-  time(&last);
   for (int i = 0; i < rst->nets.size(); i++) {
     if (i % threads == modulo) {
       route r = rst->findRoute(rst->nets[i]);
@@ -95,17 +91,6 @@ void *doRoutingTask(void *task)
       pthread_mutex_lock(&netLock);
       rst->nets[i].addRoute(r);
       pthread_mutex_unlock(&netLock);
-      
-      /* Status */
-      if (!(++i % res)) {
-        time(&end);
-        int elapsed = difftime(end, start);
-        int diff = difftime(end, last);
-        if (diff > 0)
-          printf("%ds:  %d% (%d/%d) nets routed\t%d rps  (%d min remaining)\n", elapsed, i*100/rst->nets.size(), i, rst->nets.size(), res/diff, (rst->nets.size() - i) / (res/diff) / 60);
-        time(&last);
-        fflush(stdout);
-      }
     }
   }
 }
