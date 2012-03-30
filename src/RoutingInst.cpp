@@ -54,8 +54,8 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 /********************************************************************************
  *  solveRouting - Prepares routing tasks to solve this routing instance
  ********************************************************************************/
-#define MAXTHREADS 100
-int NUMTHREADS = 4;
+#define MAXTHREADS 10
+int NUMTHREADS = 1;
 
 void RoutingInst::solveRouting()
 {
@@ -100,6 +100,11 @@ void *doRoutingTask(void *task)
       rst->nets[i].addRoute(r);
       pthread_mutex_unlock(&netLock);
     }
+
+    // Print status update
+    int res = 500;
+    if (i % res == 0)
+      printf("(%d/%d) routed\n", i, rst->nets.size());
   }
 }
 
@@ -147,7 +152,7 @@ route RoutingInst::findRoute(Net &n)
       if (e.first.z != gPins[pin].z) {
         // Connect
         edge via = makeEdge(gPins[pin], e.first);
-        
+
         // Insert via, then try again
         r.insert(r.begin(), via);
         pin++;
@@ -240,18 +245,15 @@ route RoutingInst::bfsRoute(Net &n)
     // Append to Net's route
     for (int j = 0; j < cur.size(); j++) {
       edge e = cur[j];
-      if (j == 0) {
-        // Don't merge pins
+      if (j == 0 || j == cur.size()-1)
         r.push_back(e);
-      } else {
-        // Merge consecutive edges
-        edge prev = r[r.size()-1];
-        if ((isHorizontal(e) && isHorizontal(prev)) ||
-            (isVertical(e)   && isVertical(prev))) {
-          r[r.size()-1].second = e.second;
-        } else {
+      else {
+        edge &prev = r[r.size()-1];
+        if ((isVertical(e) && isVertical(prev)) ||
+            isHorizontal(e) && isHorizontal(prev))
+          prev.second = e.second; // pass through
+        else
           r.push_back(e);
-        }
       }
     }
   }
