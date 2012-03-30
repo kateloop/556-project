@@ -44,36 +44,9 @@ int main(int argc, char **argv)
 	// print result to file
 	rst->printRoute(outputFileName);
 
-	/*
-	
- 	/// project into 2D
- 	status = projectTo2D(rst);
- 	if(status==0){
- 		printf("ERROR: projecting into 2D \n");
- 		release(rst);
- 		return 1;
- 	}
-	
- 	/// run actual routing
- 	status = solveRouting(rst);
- 	if(status==0){
- 		printf("ERROR: running routing \n");
- 		release(rst);
- 		return 1;
- 	}
-	
- 	/// write the result
- 	status = writeOutput(outputFileName, rst);
- 	if(status==0){
- 		printf("ERROR: writing the result \n");
- 		release(rst);
- 		return 1;
- 	}
-	*/
+	// release memory
+	delete rst;
 
-	/*
- 	release(rst);
-	*/
  	printf("\nDONE!\n");	
  	return 0;
 }
