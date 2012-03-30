@@ -36,6 +36,7 @@ bool operator<(point3d p1, point3d p2);
 bool operator==(point3d p1, point3d p2);
 bool operator!=(point3d p1, point3d p2);
 
+// Edge comparison function for maps
 class edgeComp {
  public: 
   bool operator()(const edge e1, const edge e2)

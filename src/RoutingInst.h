@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cmath>
 
 #include "util.h"
 #include "Net.h"
@@ -15,8 +16,35 @@
 using std::vector;
 using std::map;
 using std::set;
+using std::abs;
 
 typedef pair<edge, int> blockage;
+
+// Manhattan distance comparison function for points
+class L2Comp {
+  point3d goal;
+
+  int l2Dist(const point3d p)
+  {
+    return
+      abs((double)(goal.x - p.x)) + 
+      abs((double)(goal.y - p.y));
+  }
+
+public:
+  L2Comp(point3d goal) : 
+    goal(goal) {}
+  
+  bool operator()(const point3d p1, const point3d p2)
+  {
+    // Want shortest distance -> highest value
+    // i.e. p1 value is less, if its distance is greater
+    return l2Dist(p1) > l2Dist(p2);
+  }
+
+  private:
+  L2Comp();
+};
 
 class RoutingInst
 {

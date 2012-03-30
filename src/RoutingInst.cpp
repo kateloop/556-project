@@ -263,7 +263,8 @@ route RoutingInst::bfsRoute(Net &n)
 route RoutingInst::bfs(point3d start, point3d goal)
 {
   route r;
-  queue<point3d> open;
+  priority_queue<point3d, vector<point3d>, L2Comp> open((L2Comp(goal)));
+  //queue<point3d> open;
   map<point3d, bool> visited;
   map<point3d, point3d> prev;
   map<point3d, bool> started;
@@ -275,13 +276,13 @@ route RoutingInst::bfs(point3d start, point3d goal)
   
   while (!open.empty()) {
     // Visited?
-    if (visited[open.front()]) {
+    if (visited[open.top()]) {
       open.pop();
       continue;
     }
     
     // Mark visited
-    point3d p = open.front(); open.pop();
+    point3d p = open.top(); open.pop();
     visited[p] = true;
     
     // Goal test
