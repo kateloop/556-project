@@ -128,7 +128,7 @@ private:
   route findRoute(Net&);
 
   // Find a 2-dimensional (global routing grid) route
-  route route2d(Net &n);
+  route route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d));
 
   // Route 2 pins together
   route bfs(point3d start, point3d goal);

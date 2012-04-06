@@ -123,7 +123,7 @@ void RoutingInst::printRoute(char *outFile)
 route RoutingInst::findRoute(Net &n)
 {
   // Find a route on the 2d routing grid
-  route r = route2d(n);
+  route r = route2d(n, &RoutingInst::bfs);
   
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
@@ -211,7 +211,7 @@ bool RoutingInst::isHorizontal(edge e)
 /********************************************************************************
  *  Routing Algorithms
  ********************************************************************************/
-route RoutingInst::route2d(Net &n)
+route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d))
 {
   route r;
   vector<point3d> pins = n.getGPins();
@@ -219,7 +219,7 @@ route RoutingInst::route2d(Net &n)
     // Route this pin pair
     point3d start = pins[i];
     point3d goal  = pins[i+1];
-    route cur = lshape(start, goal);
+    route cur = (this->*routePins)(start, goal);
 
     // Append to Net's route
     for (int j = 0; j < cur.size(); j++) {
