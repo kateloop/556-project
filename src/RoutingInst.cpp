@@ -141,6 +141,9 @@ route RoutingInst::findRoute(Net &n)
     } else if (isHorizontal(e)) {
       e.first.z = hLayer;
       e.second.z = hLayer;      
+    } else {
+      
+      printf("Non horizontal/vertical edge\n");
     }
     
     // If the previous edge was on a different layer, add a via
@@ -216,7 +219,7 @@ route RoutingInst::bfsRoute(Net &n)
     // Route this pin pair
     point3d start = pins[i];
     point3d goal  = pins[i+1];
-    route cur = bfs(start, goal);
+    route cur = lshape(start, goal);
 
     // Append to Net's route
     for (int j = 0; j < cur.size(); j++) {
@@ -232,6 +235,36 @@ route RoutingInst::bfsRoute(Net &n)
           r.push_back(e);
       }
     }
+  }
+  return r;
+}
+
+route RoutingInst::lshape(point3d start, point3d goal)
+{
+  // Connect horizontal, then vertical
+  route r;
+  point3d corner;
+
+  // Already there
+  if (start == goal) {
+    // Nothing to do
+  }
+
+  // Same x or same y, no bend needed
+  else if (start.x == goal.x ||
+           start.y == goal.y) {
+    r.push_back(makeEdge(start, goal));
+  }
+
+  // Choose a corner
+  else {
+    corner.x = start.x;
+    corner.y = goal.y;
+    corner.z = start.z;
+    
+    // And connect
+    r.push_back(makeEdge(start, corner));
+    r.push_back(makeEdge(corner, goal));
   }
   return r;
 }
