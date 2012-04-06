@@ -123,20 +123,17 @@ void RoutingInst::printRoute(char *outFile)
 route RoutingInst::findRoute(Net &n)
 {
   route r = bfsRoute(n);
-
-  // Need a list of pins to add vias from our route
-  vector<point3d> gPins = n.getGPins();
-  int pin = 0; // Pin we are working on
-
+  
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
   vLayer = getVLayer();
   hLayer = getHLayer();
-
-  // Insert necessary vias between edges and to pins
-  for (int i = 0; i < r.size();) {
+  
+  // Insert necessary vias between edges 
+  for (int i = 0; i < r.size(); i++) {
+    // Grab the current edge
     edge &e = r[i];
-
+    
     // Set layer for this type of edge
     if (isVertical(e)) {
       e.first.z = vLayer;
@@ -144,53 +141,32 @@ route RoutingInst::findRoute(Net &n)
     } else if (isHorizontal(e)) {
       e.first.z = hLayer;
       e.second.z = hLayer;      
-    } else {
     }
-
-    // Connect the first pin
-    if (e.first == gPins[pin]) {
-      if (e.first.z != gPins[pin].z) {
-        // Connect
-        edge via = makeEdge(gPins[pin], e.first);
-
-        // Insert via, then try again
-        r.insert(r.begin(), via);
-        pin++;
-        continue;
-      } else {
-        // No connection needed
-        pin++;
-        continue;               // in case the next pin is here also
-      }
-    }
-
+    
     // If the previous edge was on a different layer, add a via
     if (i > 0) {		// Not needed on first edge
-      edge prev = r[i-1];
+      edge &prev = r[i-1];
       if (prev.second.z != e.first.z) { // Via needed
 	// Connect
 	edge via = makeEdge(prev.second, e.first);
 	// Insert via, then try again
 	r.insert(r.begin() + i, via);
-        continue;
       }
     }
+  }
 
-    // If we land on a pin...
-    if (e.second == gPins[pin]) {
-      // ... and the pin is on a different layer
-      if (e.second.z != gPins[pin].z) {
-        // Connect
-	edge via = makeEdge(e.second, gPins[pin]);
-        edge viaBack = makeEdge(gPins[pin], e.second);
-	// Insert
-	r.insert(r.begin() + i + 1, via);
-	r.insert(r.begin() + i + 2, viaBack);
-      }
-      pin++;                // Pin detected, move on
-      continue;
-    }
-    i++;
+  // Insert vias to pins
+  vector<point3d> gPins = n.getGPins();
+  for (int i = 0; i < gPins.size(); i++) {
+    // Create a via from the top, through to bottom
+    point3d pinTop, pinBottom;
+    pinTop.x = pinBottom.x = gPins[i].x;
+    pinTop.y = pinBottom.y = gPins[i].y;
+    pinTop.z = 0;
+    pinBottom.z = zGrid-1;
+    edge via = makeEdge(pinTop, pinBottom);
+    // Insert via
+    r.push_back(via);
   }
   return r;
 }
