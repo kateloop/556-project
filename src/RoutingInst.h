@@ -5,6 +5,9 @@
 #ifndef ROUTINGINST_H
 #define ROUTINGINST_H
 
+/********************************************************************************
+ *  Includes
+ ********************************************************************************/
 #include <vector>
 #include <map>
 #include <set>
@@ -18,19 +21,20 @@ using std::map;
 using std::set;
 using std::abs;
 
+/********************************************************************************
+ *  Local definitions
+ ********************************************************************************/
 typedef pair<edge, int> blockage;
 
 // Manhattan distance comparison function for points
 class L2Comp {
   point3d goal;
-
   int l2Dist(const point3d p)
   {
     return
       abs((double)(goal.x - p.x)) + 
       abs((double)(goal.y - p.y));
   }
-
 public:
   L2Comp(point3d goal) : 
     goal(goal) {}
@@ -41,35 +45,39 @@ public:
     // i.e. p1 value is less, if its distance is greater
     return l2Dist(p1) > l2Dist(p2);
   }
-
   private:
   L2Comp();
 };
 
+
+/********************************************************************************
+ *  RoutingInst - a class to hold nets to be routed
+ ********************************************************************************/
 class RoutingInst
 {
- public:
   /****************************************
    *  Public access
    ****************************************/
+ public:
+  // C'tor
   RoutingInst (int xGrid_in, int yGrid_in, int zGrid_in, vector<int> &vCap_in, vector<int> &hCap_in, int llx_in, int lly_in, int tWidth_in, int tHeight_in);
 
-  /* Printing functions */
+  // Printing
   void printRoute(char *outFile);
   void printGPins(vector<point3d> &gPins);
 
-  /*Public functions*/
+  // Routes
   void addNet (Net *n);
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
   void solveRouting();
 
   friend void *doRoutingTask(void *);
-  
 
   /****************************************
    *  Problem size definition
    ****************************************/
+private:
   int xGrid; /*The x dimension of the global routing grid*/
   int yGrid; /*The y dimension of the global routing grid*/
   int zGrid; /*The z dimension of the global routing grid (ie number of layers)*/
@@ -108,6 +116,7 @@ class RoutingInst
   /* Is an edge vertical or horizontal */
   bool isVertical(edge e);
   bool isHorizontal(edge e);
+
   /* Get a suitable vertical or horizontal layer */
   int getVLayer();
   int getHLayer();
@@ -130,8 +139,9 @@ class RoutingInst
 
 #endif // ROUTINGINST_H
 
-
-
+/********************************************************************************
+ *  Threading
+ ********************************************************************************/
 /* Threaded routing task */
 typedef struct {
   RoutingInst *rst;
