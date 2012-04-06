@@ -122,7 +122,8 @@ void RoutingInst::printRoute(char *outFile)
 
 route RoutingInst::findRoute(Net &n)
 {
-  route r = bfsRoute(n);
+  // Find a route on the 2d routing grid
+  route r = route2d(n);
   
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
@@ -142,7 +143,6 @@ route RoutingInst::findRoute(Net &n)
       e.first.z = hLayer;
       e.second.z = hLayer;      
     } else {
-      
       printf("Non horizontal/vertical edge\n");
     }
     
@@ -211,7 +211,7 @@ bool RoutingInst::isHorizontal(edge e)
 /********************************************************************************
  *  Routing Algorithms
  ********************************************************************************/
-route RoutingInst::bfsRoute(Net &n)
+route RoutingInst::route2d(Net &n)
 {
   route r;
   vector<point3d> pins = n.getGPins();

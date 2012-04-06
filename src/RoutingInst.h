@@ -78,8 +78,8 @@ class RoutingInst
    *  Problem size definition
    ****************************************/
 private:
-  int xGrid; /*The x dimension of the global routing grid*/
-  int yGrid; /*The y dimension of the global routing grid*/
+  int xGrid;            /*The x dimension of the global routing grid*/
+  int yGrid;            /*The y dimension of the global routing grid*/
   int zGrid; /*The z dimension of the global routing grid (ie number of layers)*/
 	
   vector<int> &vCap; /*An array of the default vertical capacity of each layer (dimension = # layers)*/
@@ -121,14 +121,16 @@ private:
   int getVLayer();
   int getHLayer();
 
-  /* Find a route for a net */
-  route findRoute(Net&);
-
   /****************************************
    *  Routing Algorithms
    ****************************************/
-  route bfsRoute(Net &n);
+  // Find a 3-dimensional (complete) route
+  route findRoute(Net&);
 
+  // Find a 2-dimensional (global routing grid) route
+  route route2d(Net &n);
+
+  // Route 2 pins together
   route bfs(point3d start, point3d goal);
   route lshape(point3d start, point3d goal);
 
