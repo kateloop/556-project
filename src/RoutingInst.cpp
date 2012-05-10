@@ -18,7 +18,9 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   llx(llx),
   lly(lly),
   tWidth(tWidth),
-  tHeight(tHeight)
+  tHeight(tHeight),
+  totalOverflow(0),
+  totalWireLength(0)
 {
 }
 
@@ -40,6 +42,7 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 
   // Adjust capacities for this edge
   int rcap = getCap(e);
+  /*
   if (isVertical(e)) {
     rcap -= vCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
@@ -47,7 +50,8 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
     rcap -= hCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
   }
-  setCap(e, rcap);
+  */
+  setCap(e, cap);
 }
 
 
@@ -76,6 +80,8 @@ void RoutingInst::solveRouting()
 
   for (int i = 0; i < NUMTHREADS; i++)
     pthread_join(threads[i], NULL);
+
+  printf("Total overflow: %d\t Total wirelength: %d\n", totalOverflow, totalWireLength);
 }
 
 // Threaded task
@@ -92,12 +98,14 @@ void *doRoutingTask(void *task)
   printf("Routing %d, %d\n", modulo, threads);
   fflush(stdout);
   
+  // Initial Routing Instance
   for (int i = 0; i < rst->nets.size(); i++) {
     if (i % threads == modulo) {
       route r = rst->findRoute(rst->nets[i]);
 
       pthread_mutex_lock(&netLock);
-      rst->nets[i].addRoute(r);
+      rst->nets[i].addRoute(r); // Add route to Net
+      rst->addRoute(r);         // Adjust routing grid capacities
       pthread_mutex_unlock(&netLock);
     }
 
@@ -435,4 +443,12 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
   pts.insert(right);
 
   return pts;
+}
+
+void RoutingInst::addRoute(route r)
+{
+}
+
+void RoutingInst::removeRoute(route r)
+{
 }

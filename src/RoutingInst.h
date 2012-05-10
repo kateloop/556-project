@@ -105,6 +105,11 @@ private:
   /* Edge capacities */
   map<edge, int, edgeComp> edgeCap; /* 2D edge capacity utilization (Global routing grid) */
   map<edge, bool, edgeComp> edgeCapInitd; /* Edge capacity initialized */
+  int totalOverflow;                      // Total overflow count
+  int totalWireLength;                    // Total wirelength
+
+  void addRoute(route r);       
+  void removeRoute(route r);
 
   /****************************************
    *  Internal functions
