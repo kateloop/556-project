@@ -108,10 +108,10 @@ private:
   int totalOverflow;                      // Total overflow count
   int totalWireLength;                    // Total wirelength
 
-  void addRoute(route r);       // Adjust routing cap/wirelength for a route
+  int addRoute(route r);       // Adjust routing cap/wirelength for a route - return OFL
   void removeRoute(route r);    // Remove routing cap/wirelength for a route
 
-  void addCap(edge e);          // Add/Remove capacity for an edge
+  int addCap(edge e);          // Add/Remove capacity for an edge - return OFL
   void removeCap(edge e);
   void addWireLength(edge e);   // Add/Remove wirelength for an edge
   void removeWireLength(edge e);

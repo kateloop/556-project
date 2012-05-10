@@ -105,8 +105,10 @@ void *doRoutingTask(void *task)
       route r = rst->findRoute(rst->nets[i]);
 
       pthread_mutex_lock(&netLock);
-      rst->nets[i].addRoute(r); // Add route to Net
-      rst->addRoute(r);         // Adjust routing grid capacities
+      int ofl = rst->addRoute(r);         // Adjust routing grid capacities
+      printf("OFL for net is %d\n", ofl);
+      rst->nets[i].addRoute(r);          // Add route to Net
+
       pthread_mutex_unlock(&netLock);
     }
 
@@ -446,23 +448,40 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
   return pts;
 }
 
-void RoutingInst::addRoute(route r)
+int RoutingInst::addRoute(route r)
 {
+  int ofl = 0;
   // Calculate this route's wirelength and capacity adjustments
   for (int i = 0; i < r.size(); i++) {
     edge e = r[i];
     addWireLength(e);
-    addCap(e);
+    ofl += addCap(e);
   }
+  return ofl;
 }
 
 void RoutingInst::removeRoute(route r)
 {
 }
 
-void RoutingInst::addCap(edge e)
+int RoutingInst::addCap(edge e)
 {
-  
+  vector<edge> edges = getDecomposedEdge(e);
+  int ofl = 0;
+  for (int i = 0; i < edges.size(); i++) {
+    // Vias have infinite capacity
+    if (!isVertical(e) && !isHorizontal(e))
+      continue;
+    int cap = getCap(edges[i]);
+    printf("Cap for %s : %d\n", edgeToString(edges[i]).c_str(), cap);
+    if (cap <= 0) {
+      totalOverflow++;
+      ofl++;
+      printf("TOF: %d\n", totalOverflow);
+    }
+    setCap(edges[i], cap-1);
+  }
+  return ofl;
 }
 
 void RoutingInst::removeCap(edge e)
@@ -490,8 +509,33 @@ void RoutingInst::removeWireLength(edge e)
   addWeightedWireLength(e, -1);
 }
 
-vector<edge> getDecomposedEdge(edge e)
+vector<edge> RoutingInst::getDecomposedEdge(edge e)
 {
   vector <edge> edges;
-  return vector<edge>();
+  if (isVertical(e)) {
+    int starty = min(e.first.y, e.second.y);
+    int endy   = max(e.first.y, e.second.y);
+    for (int y = starty; y < endy; y++) {
+      point3d pfirst, psecond;
+      pfirst.x = e.first.x;
+      pfirst.y = y;
+      psecond.x = e.first.x;
+      psecond.y = y+1;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else if (isHorizontal(e)) {
+    int startx = min(e.first.x, e.second.x);
+    int endx   = max(e.first.x, e.second.x);
+    for (int x = startx; x < endx; x++) {
+      point3d pfirst, psecond;
+      pfirst.x = x;
+      pfirst.y = e.first.y;
+      psecond.x = x+1;
+      psecond.y = e.second.y;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else {                      // Via
+    edges.push_back(e);
+  }
+  return edges;
 }
