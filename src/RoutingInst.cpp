@@ -55,7 +55,7 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
  *  solveRouting - Prepares routing tasks to solve this routing instance
  ********************************************************************************/
 #define MAXTHREADS 10
-int NUMTHREADS = 4;
+int NUMTHREADS = 1;
 
 void RoutingInst::solveRouting()
 {
