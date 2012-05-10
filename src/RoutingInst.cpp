@@ -41,8 +41,9 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   isBlocked[e] = true;
 
   // Adjust capacities for this edge
-  int rcap = getCap(e);
   /*
+    TODO : Are blockages only on layer 1?
+    
   if (isVertical(e)) {
     rcap -= vCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
@@ -447,6 +448,15 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
 
 void RoutingInst::addRoute(route r)
 {
+  // Calculate this route's wirelength
+  for (int i = 0; i < r.size(); i++) {
+    if (isVertical(e)) {
+      totalWireLength += abs(e.first.y - e.second.y);
+    } else if (isHorizontal(e)) {
+      totalWireLength += abs(e.first.x - e.second.x);
+    } else {                    // via
+      totalWireLength += abs(e.first.z - e.second.z);
+  }
 }
 
 void RoutingInst::removeRoute(route r)
