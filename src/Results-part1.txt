@@ -1,0 +1,10 @@
+File Names(In, Out)                         Tot OF       Max OF
+WL
+eval2008/adaptec1.1000.gr, infiles/a         38098          216
+59293
+
+File Names(In, Out)                         Tot OF       Max OF
+WL
+eval2008/adaptec1.50000.gr, infiles/       3344216         1950
+3272709
+
