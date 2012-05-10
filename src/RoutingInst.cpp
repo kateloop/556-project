@@ -448,17 +448,50 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
 
 void RoutingInst::addRoute(route r)
 {
-  // Calculate this route's wirelength
+  // Calculate this route's wirelength and capacity adjustments
   for (int i = 0; i < r.size(); i++) {
-    if (isVertical(e)) {
-      totalWireLength += abs(e.first.y - e.second.y);
-    } else if (isHorizontal(e)) {
-      totalWireLength += abs(e.first.x - e.second.x);
-    } else {                    // via
-      totalWireLength += abs(e.first.z - e.second.z);
+    edge e = r[i];
+    addWireLength(e);
+    addCap(e);
   }
 }
 
 void RoutingInst::removeRoute(route r)
 {
+}
+
+void RoutingInst::addCap(edge e)
+{
+  
+}
+
+void RoutingInst::removeCap(edge e)
+{
+}
+
+void RoutingInst::addWeightedWireLength(edge e, int weight)
+{
+  if (isVertical(e)) {
+    totalWireLength += weight * abs((double)e.first.y - e.second.y);
+  } else if (isHorizontal(e)) {
+    totalWireLength += weight * abs((double)e.first.x - e.second.x);
+  } else {                    // via
+    totalWireLength += weight * abs((double)e.first.z - e.second.z);
+  }
+}
+
+void RoutingInst::addWireLength(edge e)
+{
+  addWeightedWireLength(e);
+}
+
+void RoutingInst::removeWireLength(edge e)
+{
+  addWeightedWireLength(e, -1);
+}
+
+vector<edge> getDecomposedEdge(edge e)
+{
+  vector <edge> edges;
+  return vector<edge>();
 }
