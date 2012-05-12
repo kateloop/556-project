@@ -121,6 +121,8 @@ private:
   void addWeightedCap(edge e, int weight=1);
   void addWeightedWireLength(edge e, int weight=1);
 
+  int getNetOfl(Net &n);         // Returns the number of edges with overflow on this net
+
   /****************************************
    *  Internal functions
    ****************************************/

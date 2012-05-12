@@ -16,21 +16,6 @@ extern int NUMTHREADS;
 
 int main(int argc, char **argv)
 {
-  /**
-  map<edge, int, edgeComp> m;
-        point3d p1, p2;
-        p1.x = 1;
-        p1.y = 3;
-        p2.x = 0;
-        p2.y = 4;
-
-        edge e1(p1, p2);
-        edge e2(p2, p1);
-
-        m[e1] = 1;
-        printf("%d %d\n", m[e1], m[e2]);
-  **/
-
  	if(argc != 3 && 
            argc != 4){
  		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> [numThreads]\n");

@@ -84,11 +84,30 @@ void RoutingInst::solveRouting()
   for (int i = 0; i < NUMTHREADS; i++)
     pthread_join(threads[i], NULL);
 
+  // Set overflows for each Net
+  for (int i = 0; i < nets.size(); i++) {
+    int ofl = getNetOfl(nets[i]);
+    nets[i].setOfl(ofl);
+  }
+
+  /*
   // Rip-up, and re-route
   sort(nets.begin(), nets.end(), netCompByOfl);
   for (int i = 0; i < 1; i++) {
-    //removeRoute(nets[i].getRoute());
+    route r = nets[i].getRoute();
+    int preOflCount = nets[i].getOfl();
+    printf("Start with %d overflow, and %d tof\n", preOflCount, totalOverflow);
+    removeRoute(r);
+    printf("Total overflow is now %d\n", totalOverflow);
+
+    printf("Re-routing with bfs\n");
+    route rp = findRoute(nets[i], &RoutingInst::bfs);
+    nets[i].setRoute(rp);
+    nets[i].setOfl(getNetOfl(nets[i]));
+    int postOflCount = nets[i].getOfl();
+    printf("Post is %d\n", postOflCount);
   }
+  */
   
   printf("Total overflow: %d\t Total wirelength: %d\n", totalOverflow, totalWireLength);
 }
@@ -341,6 +360,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
         edge e = makeEdge(p, *it);
         if (!started[*it] &&
             !isBlocked[e] &&
+            getCap(e) >= 0 &&
             (*it).x >= 0  &&
             (*it).y >= 0) {
           prev[*it] = p;
@@ -482,7 +502,7 @@ void RoutingInst::addWeightedCap(edge e, int weight)
     if (!isVertical(e) && !isHorizontal(e))
       continue;
     int cap = getCap(edges[i]);
-    if (cap <= 0) {
+    if (cap < 0) {
       totalOverflow += weight;
     }
     setCap(edges[i], cap - weight);
@@ -554,4 +574,19 @@ vector<edge> RoutingInst::getDecomposedEdge(edge e)
 bool netCompByOfl(Net n1, Net n2)
 {
   return n1.getOfl() > n2.getOfl();
+}
+
+int RoutingInst::getNetOfl(Net &n)
+{
+  route r = n.getRoute();
+  int ofl = 0;
+  for (int j = 0; j < r.size(); j++) {
+    edge e = r[j];
+    vector<edge> edges = getDecomposedEdge(e);
+    for (int k = 0; k < edges.size(); k++) {
+      if (edgeCap[edges[k]] < 0)
+        ofl++;
+      }
+  }
+  return ofl;
 }
