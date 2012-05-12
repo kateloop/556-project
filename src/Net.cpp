@@ -23,13 +23,6 @@ void Net::addPin(point3d pin)
 
 void Net::printRoute(FILE *of)
 {
-  if (!routes.size()) {
-    printf("ERR: printRoute called on Net without route\n");
-    return;
-  }
-  
-  route r = routes[0];
-
   fprintf(of, "%s %d %d\n", name.c_str(), id, r.size());
   
   for (int i = 0; i < r.size(); i++) {
@@ -53,7 +46,7 @@ void Net::printInput()
 
 void Net::addRoute(route r)
 {
-  routes.push_back(r);
+  this->r = r;
 }
 
 vector<point3d> &Net::getGPins()
@@ -73,7 +66,7 @@ int Net::getOfl()
 
 route Net::getRoute()
 {
-  return routes[0];
+  return r;
 }
 
 bool pinSortCompare (point3d p1, point3d p2) {
