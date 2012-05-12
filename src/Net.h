@@ -28,6 +28,8 @@ class Net {
   vector<point3d> gPins;	/* An array of pins in the global routing grid (2d) */
   int routeNum;     	/* Number of (candidate) routes of the net. This may be equal to one (only one candidate route) in your implementation. */
   route r;	/* An array of candidate routes of the net. */
+
+  int ofl;                      // Ofl of this Net's route - must be set by rst
   
  public:
   /*constructor*/
@@ -38,6 +40,7 @@ class Net {
   void printInput();
   void setRoute(route r);
   route getRoute();
+  void setOfl(int ofl);
   int getOfl();
 
   string getName();

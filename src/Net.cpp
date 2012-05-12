@@ -59,9 +59,14 @@ string Net::getName()
   return name;
 }
 
+void Net::setOfl(int ofl)
+{
+  this->ofl = ofl;
+}
+
 int Net::getOfl()
 {
-  return 0;
+  return ofl;
 }
 
 route Net::getRoute()
