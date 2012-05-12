@@ -44,7 +44,7 @@ void Net::printInput()
     printf("%d %d %d\n", gPins[i].x, gPins[i].y, gPins[i].z);
 }
 
-void Net::addRoute(route r)
+void Net::setRoute(route r)
 {
   this->r = r;
 }

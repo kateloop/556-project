@@ -115,7 +115,7 @@ void *doRoutingTask(void *task)
 
       pthread_mutex_lock(&netLock);
       rst->addRoute(r);                       // Adjust routing grid capacities
-      rst->nets[i].addRoute(r);               // Add route to Net
+      rst->nets[i].setRoute(r);               // Add route to Net
 
       pthread_mutex_unlock(&netLock);
     }

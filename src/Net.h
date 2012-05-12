@@ -36,7 +36,7 @@ class Net {
   /*Public functions*/
   void addPin(point3d pin);
   void printInput();
-  void addRoute(route r);
+  void setRoute(route r);
   route getRoute();
   int getOfl();
 
