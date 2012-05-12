@@ -41,6 +41,7 @@ class Net {
   int getOfl();
 
   string getName();
+  void reorderPins(); 	
 
   /* Output */
   void printRoute(FILE *of);
