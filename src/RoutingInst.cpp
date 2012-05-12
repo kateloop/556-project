@@ -4,6 +4,7 @@
 #include <time.h>
 #include <queue>
 #include <stack>
+#include <algorithm>
 
 #include <pthread.h>
 
@@ -44,13 +45,13 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   /*
     TODO : Are blockages only on layer 1?
     
-  if (isVertical(e)) {
+    if (isVertical(e)) {
     rcap -= vCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
-  } else { // horizontal
+    } else { // horizontal
     rcap -= hCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
-  }
+    }
   */
   setCap(e, cap);
 }
@@ -69,6 +70,7 @@ void RoutingInst::solveRouting()
   routeTask tasks[MAXTHREADS];
 
   printf("Routing %d nets\n", nets.size());
+  // Do initial routing
   for (int i = 0; i < NUMTHREADS; i++) {
     routeTask rt;
     tasks[i].rst = this;
@@ -82,6 +84,12 @@ void RoutingInst::solveRouting()
   for (int i = 0; i < NUMTHREADS; i++)
     pthread_join(threads[i], NULL);
 
+  // Rip-up, and re-route
+  sort(nets.begin(), nets.end(), netCompByOfl);
+  for (int i = 0; i < 1; i++) {
+    //removeRoute(nets[i].getRoute());
+  }
+  
   printf("Total overflow: %d\t Total wirelength: %d\n", totalOverflow, totalWireLength);
 }
 
@@ -105,9 +113,8 @@ void *doRoutingTask(void *task)
       route r = rst->findRoute(rst->nets[i]);
 
       pthread_mutex_lock(&netLock);
-      int ofl = rst->addRoute(r);         // Adjust routing grid capacities
-      printf("OFL for net is %d\n", ofl);
-      rst->nets[i].addRoute(r);          // Add route to Net
+      rst->addRoute(r);                       // Adjust routing grid capacities
+      rst->nets[i].addRoute(r);               // Add route to Net
 
       pthread_mutex_unlock(&netLock);
     }
@@ -131,10 +138,10 @@ void RoutingInst::printRoute(char *outFile)
   }
 }
 
-route RoutingInst::findRoute(Net &n)
+route RoutingInst::findRoute(Net &n, route (RoutingInst::*routePins)(point3d, point3d))
 {
   // Find a route on the 2d routing grid
-  route r = route2d(n, &RoutingInst::bfs);
+  route r = route2d(n, routePins);
   
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
@@ -311,7 +318,6 @@ route RoutingInst::bfs(point3d start, point3d goal)
       
       // Retrace and reverse
       while (p != start) {
-        //printf("(%d,%d)\n", p.x, p.y);
         edge e;
         e.first = prev[p];
         e.second = p;
@@ -448,44 +454,48 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
   return pts;
 }
 
-int RoutingInst::addRoute(route r)
+void RoutingInst::addRoute(route r)
 {
-  int ofl = 0;
   // Calculate this route's wirelength and capacity adjustments
   for (int i = 0; i < r.size(); i++) {
     edge e = r[i];
     addWireLength(e);
-    ofl += addCap(e);
+    addCap(e);
   }
-  return ofl;
 }
 
 void RoutingInst::removeRoute(route r)
 {
+  for (int i = 0; i < r.size(); i++) {
+    edge e = r[i];
+    removeWireLength(e);
+    removeCap(e);
+  }
 }
 
-int RoutingInst::addCap(edge e)
+void RoutingInst::addWeightedCap(edge e, int weight)
 {
   vector<edge> edges = getDecomposedEdge(e);
-  int ofl = 0;
   for (int i = 0; i < edges.size(); i++) {
     // Vias have infinite capacity
     if (!isVertical(e) && !isHorizontal(e))
       continue;
     int cap = getCap(edges[i]);
-    printf("Cap for %s : %d\n", edgeToString(edges[i]).c_str(), cap);
     if (cap <= 0) {
-      totalOverflow++;
-      ofl++;
-      printf("TOF: %d\n", totalOverflow);
+      totalOverflow += weight;
     }
-    setCap(edges[i], cap-1);
+    setCap(edges[i], cap - weight);
   }
-  return ofl;
+}
+
+void RoutingInst::addCap(edge e)
+{
+  addWeightedCap(e,1);
 }
 
 void RoutingInst::removeCap(edge e)
 {
+  addWeightedCap(e,-1);
 }
 
 void RoutingInst::addWeightedWireLength(edge e, int weight)
@@ -538,4 +548,9 @@ vector<edge> RoutingInst::getDecomposedEdge(edge e)
     edges.push_back(e);
   }
   return edges;
+}
+
+bool netCompByOfl(Net n1, Net n2)
+{
+  return n1.getOfl() > n2.getOfl();
 }

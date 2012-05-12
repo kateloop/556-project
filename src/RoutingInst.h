@@ -49,6 +49,8 @@ public:
   L2Comp();
 };
 
+/* Compare nets by ofl to sort */
+bool netCompByOfl(Net n1, Net n2);
 
 /********************************************************************************
  *  RoutingInst - a class to hold nets to be routed
@@ -108,16 +110,16 @@ private:
   int totalOverflow;                      // Total overflow count
   int totalWireLength;                    // Total wirelength
 
-  int addRoute(route r);       // Adjust routing cap/wirelength for a route - return OFL
+  void addRoute(route r);       // Adjust routing cap/wirelength for a route 
   void removeRoute(route r);    // Remove routing cap/wirelength for a route
 
-  int addCap(edge e);          // Add/Remove capacity for an edge - return OFL
+  void addCap(edge e);          // Add/Remove capacity for an edge
   void removeCap(edge e);
   void addWireLength(edge e);   // Add/Remove wirelength for an edge
   void removeWireLength(edge e);
 
+  void addWeightedCap(edge e, int weight=1);
   void addWeightedWireLength(edge e, int weight=1);
-  
 
   /****************************************
    *  Internal functions
@@ -141,7 +143,7 @@ private:
    *  Routing Algorithms
    ****************************************/
   // Find a 3-dimensional (complete) route
-  route findRoute(Net&);
+  route findRoute(Net&, route (RoutingInst::*routePins)(point3d, point3d)=&RoutingInst::lshape);
 
   // Find a 2-dimensional (global routing grid) route
   route route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d));

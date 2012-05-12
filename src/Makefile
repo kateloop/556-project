@@ -38,7 +38,7 @@ ece556.o: ece556.cpp ece556.h RoutingInst.cpp RoutingInst.h Net.cpp Net.h
 	/bin/rm -f ece556.o
 	$(CCC) $(CCFLAGS) ece556.cpp -c
 
-util.o: util.cpp ece556.h RoutingInst.h Net.h
+util.o: util.cpp ece556.h RoutingInst.h Net.h util.h
 	/bin/rm -f util.o
 	$(CCC) $(CCFLAGS) util.cpp -c
 

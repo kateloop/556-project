@@ -27,6 +27,10 @@ using std::string;
  */
 typedef pair<point3d, point3d> edge;
 
+extern string edgeToString(edge e);
+
+
+
 /**
  *  A route
  **/
@@ -41,7 +45,20 @@ class edgeComp {
  public: 
   bool operator()(const edge e1, const edge e2)
   {
-    return e1 < e2;
+    edge ep1, ep2;
+
+    // Normalize points
+    if (e1.first < e1.second) {
+      ep1 = edge(e1.second, e1.first);
+    } else {
+      ep1 = e1;
+    }
+    if (e2.first < e2.second) {
+      ep2 = edge(e2.second, e2.first);
+    } else {
+      ep2 = e2;
+    }
+    return ep1 < ep2;
   }
 };
 

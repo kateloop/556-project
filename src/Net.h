@@ -37,6 +37,9 @@ class Net {
   void addPin(point3d pin);
   void printInput();
   void addRoute(route r);
+  route getRoute();
+  int getOfl();
+
   string getName();
 
   /* Output */

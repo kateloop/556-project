@@ -64,3 +64,13 @@ string Net::getName()
 {
   return name;
 }
+
+int Net::getOfl()
+{
+  return 0;
+}
+
+route Net::getRoute()
+{
+  return routes[0];
+}
