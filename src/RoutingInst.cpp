@@ -18,7 +18,9 @@ RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, ve
   llx(llx),
   lly(lly),
   tWidth(tWidth),
-  tHeight(tHeight)
+  tHeight(tHeight),
+  totalOverflow(0),
+  totalWireLength(0)
 {
 }
 
@@ -39,7 +41,9 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   isBlocked[e] = true;
 
   // Adjust capacities for this edge
-  int rcap = getCap(e);
+  /*
+    TODO : Are blockages only on layer 1?
+    
   if (isVertical(e)) {
     rcap -= vCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
@@ -47,7 +51,8 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
     rcap -= hCap[e.first.z - 1]; // z index starts at 1..
     rcap += cap;
   }
-  setCap(e, rcap);
+  */
+  setCap(e, cap);
 }
 
 
@@ -55,7 +60,7 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
  *  solveRouting - Prepares routing tasks to solve this routing instance
  ********************************************************************************/
 #define MAXTHREADS 10
-int NUMTHREADS = 4;
+int NUMTHREADS = 1;
 
 void RoutingInst::solveRouting()
 {
@@ -76,6 +81,8 @@ void RoutingInst::solveRouting()
 
   for (int i = 0; i < NUMTHREADS; i++)
     pthread_join(threads[i], NULL);
+
+  printf("Total overflow: %d\t Total wirelength: %d\n", totalOverflow, totalWireLength);
 }
 
 // Threaded task
@@ -92,12 +99,16 @@ void *doRoutingTask(void *task)
   printf("Routing %d, %d\n", modulo, threads);
   fflush(stdout);
   
+  // Initial Routing Instance
   for (int i = 0; i < rst->nets.size(); i++) {
     if (i % threads == modulo) {
       route r = rst->findRoute(rst->nets[i]);
 
       pthread_mutex_lock(&netLock);
-      rst->nets[i].addRoute(r);
+      int ofl = rst->addRoute(r);         // Adjust routing grid capacities
+      printf("OFL for net is %d\n", ofl);
+      rst->nets[i].addRoute(r);          // Add route to Net
+
       pthread_mutex_unlock(&netLock);
     }
 
@@ -435,4 +446,96 @@ set<point3d> RoutingInst::getNeighborPoints(point3d p)
   pts.insert(right);
 
   return pts;
+}
+
+int RoutingInst::addRoute(route r)
+{
+  int ofl = 0;
+  // Calculate this route's wirelength and capacity adjustments
+  for (int i = 0; i < r.size(); i++) {
+    edge e = r[i];
+    addWireLength(e);
+    ofl += addCap(e);
+  }
+  return ofl;
+}
+
+void RoutingInst::removeRoute(route r)
+{
+}
+
+int RoutingInst::addCap(edge e)
+{
+  vector<edge> edges = getDecomposedEdge(e);
+  int ofl = 0;
+  for (int i = 0; i < edges.size(); i++) {
+    // Vias have infinite capacity
+    if (!isVertical(e) && !isHorizontal(e))
+      continue;
+    int cap = getCap(edges[i]);
+    printf("Cap for %s : %d\n", edgeToString(edges[i]).c_str(), cap);
+    if (cap <= 0) {
+      totalOverflow++;
+      ofl++;
+      printf("TOF: %d\n", totalOverflow);
+    }
+    setCap(edges[i], cap-1);
+  }
+  return ofl;
+}
+
+void RoutingInst::removeCap(edge e)
+{
+}
+
+void RoutingInst::addWeightedWireLength(edge e, int weight)
+{
+  if (isVertical(e)) {
+    totalWireLength += weight * abs((double)e.first.y - e.second.y);
+  } else if (isHorizontal(e)) {
+    totalWireLength += weight * abs((double)e.first.x - e.second.x);
+  } else {                    // via
+    totalWireLength += weight * abs((double)e.first.z - e.second.z);
+  }
+}
+
+void RoutingInst::addWireLength(edge e)
+{
+  addWeightedWireLength(e);
+}
+
+void RoutingInst::removeWireLength(edge e)
+{
+  addWeightedWireLength(e, -1);
+}
+
+vector<edge> RoutingInst::getDecomposedEdge(edge e)
+{
+  vector <edge> edges;
+  if (isVertical(e)) {
+    int starty = min(e.first.y, e.second.y);
+    int endy   = max(e.first.y, e.second.y);
+    for (int y = starty; y < endy; y++) {
+      point3d pfirst, psecond;
+      pfirst.x = e.first.x;
+      pfirst.y = y;
+      psecond.x = e.first.x;
+      psecond.y = y+1;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else if (isHorizontal(e)) {
+    int startx = min(e.first.x, e.second.x);
+    int endx   = max(e.first.x, e.second.x);
+    for (int x = startx; x < endx; x++) {
+      point3d pfirst, psecond;
+      pfirst.x = x;
+      pfirst.y = e.first.y;
+      psecond.x = x+1;
+      psecond.y = e.second.y;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else {                      // Via
+    edges.push_back(e);
+  }
+  return edges;
 }
