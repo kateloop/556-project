@@ -102,6 +102,7 @@ void *doRoutingTask(void *task)
   // Initial Routing Instance
   for (int i = 0; i < rst->nets.size(); i++) {
     if (i % threads == modulo) {
+      rst->nets[i].reorderPins();
       route r = rst->findRoute(rst->nets[i]);
 
       pthread_mutex_lock(&netLock);
