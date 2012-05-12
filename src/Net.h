@@ -38,6 +38,7 @@ class Net {
   void printInput();
   void addRoute(route r);
   string getName();
+  void reorderPins(); 	
 
   /* Output */
   void printRoute(FILE *of);

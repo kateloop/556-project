@@ -1,5 +1,6 @@
 #include "Net.h"
 #include "util.h"
+#include <algorithm>
 
 /*constructor*/
 Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHeight) :
@@ -63,4 +64,23 @@ vector<point3d> &Net::getGPins()
 string Net::getName()
 {
   return name;
+}
+
+bool pinSortCompare (point3d p1, point3d p2) {
+   if (p1.x < p2.x) {
+      return true;
+   } else if (p2.x < p1.x) {
+      return false;
+   } else {
+      // p2.x == p1.x
+      if (p1.y < p2.y) {
+         return true;
+      } else {
+         return false;
+      }
+   } 
+}
+
+void Net::reorderPins() {
+   sort (gPins.begin(), gPins.end(), pinSortCompare);  	
 }
