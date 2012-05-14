@@ -71,6 +71,8 @@ void RoutingInst::solveRouting()
 
   // Check total wirelength
   printf("Total wirelength: %d\n", getTotalWireLength());
+  // Check total overflow
+  printf("Total overflow: %d\n", getTotalOverflow());
 }
 
 
@@ -176,30 +178,27 @@ int RoutingInst::getHLayer() {
 /* get capacity of edge, initialize if needed */
 int RoutingInst::getCap(edge e)
 {
-  /*
   // Initialize if necessary
-  if (!edgeCapInitd[e]) {
-    edgeCapInitd[e] = true;
+  if (!edgeCapInitd2d[e]) {
+    edgeCapInitd2d[e] = true;
     if (isVertical(e)) {
-      for (int i = 0; i < vCap.size(); i++)
-	edgeCap[e] += vCap[i];
+      //      for (int i = 0; i < vCap.size(); i++)
+      for (int i = 0; i < 1; i++)
+	edgeCap2d[e] += vCap[i];
     } else {
-      for (int i = 0; i < hCap.size(); i++)
-	edgeCap[e] += hCap[i];
+      //      for (int i = 0; i < hCap.size(); i++)
+      for (int i = 0; i < 1; i++)
+	edgeCap2d[e] += hCap[i];
     }
   }
-  return edgeCap[e];
-  */
-  return 0;
+  return edgeCap2d[e];
 }
 
 /* write over previous capacity */
 void RoutingInst::setCap(edge e, int cap)
 {
-  /*
-  edgeCapInitd[e] = true;
-  edgeCap[e] = cap;
-  */
+  edgeCapInitd2d[e] = true;
+  edgeCap2d[e] = cap;
 }
 
 // Returns the 3D wirelength for all nets' routes
@@ -215,7 +214,19 @@ int RoutingInst::getTotalWireLength()
 
 int RoutingInst::getTotalOverflow()
 {
-  return 0;
+  int ofl = 0;
+  for (int i = 0; i < nets.size(); i++) {
+    route r = nets[i].getRoute();
+    vector<edge> edges = getDecomposedEdges(r);
+    for (int j = 0; j < edges.size(); j++) {
+      edge e = edges[j];
+      int cap = getCap(e);
+      if (cap <= 0 && (isVertical(e) || isHorizontal(e)))
+        ofl++;
+      setCap(e, cap-1);
+    }
+  }
+  return ofl;
 }
 
 // Returns wirelength for this route
