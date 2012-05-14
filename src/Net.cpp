@@ -10,7 +10,8 @@ Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHe
   llx(llx),
   lly(lly),
   tWidth(tWidth),
-  tHeight(tHeight)
+  tHeight(tHeight),
+  ofl(0)
 {
 }
 	
@@ -59,16 +60,6 @@ string Net::getName()
   return name;
 }
 
-void Net::setOfl(int ofl)
-{
-  this->ofl = ofl;
-}
-
-int Net::getOfl()
-{
-  return ofl;
-}
-
 route Net::getRoute()
 {
   return r;
@@ -92,3 +83,12 @@ bool pinSortCompare (point3d p1, point3d p2) {
 void Net::reorderPins() {
    sort (gPins.begin(), gPins.end(), pinSortCompare);  	
 }
+
+void Net::setOfl(int ofl) {
+  this->ofl = ofl;
+}
+
+int Net::getOfl() {
+  return ofl;
+}
+

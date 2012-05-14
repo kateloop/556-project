@@ -49,9 +49,6 @@ public:
   L2Comp();
 };
 
-/* Compare nets by ofl to sort */
-bool netCompByOfl(Net n1, Net n2);
-
 /********************************************************************************
  *  RoutingInst - a class to hold nets to be routed
  ********************************************************************************/
@@ -73,8 +70,6 @@ class RoutingInst
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
   void solveRouting();
-
-  friend void *doRoutingTask(void *);
 
   /****************************************
    *  Problem size definition
@@ -125,6 +120,7 @@ private:
   int getTotalOverflow();
 
   int getRouteWireLength(route &r);
+  int getRouteOverflow(route &r);
 
   vector<edge> getDecomposedEdges(route &r);
   vector<edge> getDecomposedEdge(edge &e);

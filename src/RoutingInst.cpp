@@ -1,5 +1,4 @@
 #include "RoutingInst.h"
-
 #include <stdio.h>
 #include <time.h>
 #include <queue>
@@ -11,6 +10,10 @@
 
 using namespace std;
 
+bool netCompByOverflow(Net n1, Net n2)
+{
+  return n1.getOfl() > n2.getOfl();
+}
 
 /********************************************************************************
  *  RoutingInst construction 
@@ -55,6 +58,9 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
  ********************************************************************************/
 void RoutingInst::solveRouting()
 {
+  /****************************************
+   * Initial Solution
+   ****************************************/
   for (int i = 0; i < nets.size(); i++) {
     // Reorder this nets pins
     nets[i].reorderPins();
@@ -71,10 +77,34 @@ void RoutingInst::solveRouting()
     addRoute(r3d);
   }
 
-  // Check total wirelength
+  // All nets routed, give overflow
+  for (int i = 0; i < nets.size(); i++) {
+    route r = nets[i].getRoute();
+    nets[i].setOfl(getRouteOverflow(r));
+  }
+
+  // Print stats before rip-up and re-route
+  printf("=== Before Rip-up and Re-route ===\n");
   printf("Total wirelength: %d\n", getTotalWireLength());
-  // Check total overflow
   printf("Total overflow: %d\n", getTotalOverflow());
+  printf("==================================\n\n");
+
+  /****************************************
+   *  Rip-up and Re-route
+   ****************************************/
+  // Sort nets by ofl
+  sort(nets.begin(), nets.end(), &netCompByOverflow);
+
+  int TOF = 0;
+  for (int i = 0; i < 1; i++) {
+    int ofl = nets[i].getOfl();
+    if (ofl > 0) {
+      TOF += ofl;
+      printf("%d\n", ofl);
+    }
+  }
+
+  printf("TOF: %d\n", TOF);
 }
 
 
@@ -225,20 +255,30 @@ int RoutingInst::getTotalWireLength()
   return wl;
 }
 
+// Returns a route's 2D overflow
+int RoutingInst::getRouteOverflow(route &r)
+{
+  int ofl = 0;
+  for (int i = 0; i < r.size(); i++) {
+    edge e = r[i];
+    if (isVia(e))
+      continue;
+    else if (getCap(e) >= 0)
+      continue;
+    else
+      ofl += -getCap(e);
+  }
+  return ofl;
+}
+
 // Returns the sum of negative edge capacities that are not vias
 int RoutingInst::getTotalOverflow()
 {
   int ofl = 0;
-  for (map<edge, int>::iterator it = edgeCap2d.begin(); it != edgeCap2d.end(); it++) {
-    edge e = (*it).first;
-    int cap = (*it).second;
-
-    // Vias have infinite capacity
-    if (isVia(e))
-      ofl++;
-    else if (cap < 0)
-      ofl += -cap;
-  }    
+  for (int i = 0; i < nets.size(); i++) {
+    route r = nets[i].getRoute();
+    ofl += getRouteOverflow(r);
+  }
   return ofl;
 }
 

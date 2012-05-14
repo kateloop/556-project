@@ -29,8 +29,8 @@ class Net {
   int routeNum;     	/* Number of (candidate) routes of the net. This may be equal to one (only one candidate route) in your implementation. */
   route r;	/* An array of candidate routes of the net. */
 
-  int ofl;                      // Ofl of this Net's route - must be set by rst
-  
+  int ofl;                      // Overflow of this net's route
+
  public:
   /*constructor*/
   Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHeight);
@@ -39,11 +39,12 @@ class Net {
   void addPin(point3d pin);
   void setRoute(route r);
   route getRoute();
-  void setOfl(int ofl);
-  int getOfl();
 
   string getName();
   void reorderPins(); 	
+
+  void setOfl(int ofl);
+  int getOfl();
 
   /* Output */
   void printRoute(FILE *of);
