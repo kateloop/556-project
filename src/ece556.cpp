@@ -71,7 +71,6 @@ RoutingInst* readBenchmark(const char *fileName) {
 
   // Blockages
   inf >> numBlockages;
-  cout << numBlockages;
 
   for (int i = 0; i < numBlockages; i++) {
     point3d p1, p2;

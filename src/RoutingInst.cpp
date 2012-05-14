@@ -169,6 +169,7 @@ int RoutingInst::getHLayer() {
 /* get capacity of edge, initialize if needed */
 int RoutingInst::getCap(edge e)
 {
+  /*
   // Initialize if necessary
   if (!edgeCapInitd[e]) {
     edgeCapInitd[e] = true;
@@ -181,13 +182,17 @@ int RoutingInst::getCap(edge e)
     }
   }
   return edgeCap[e];
+  */
+  return 0;
 }
 
 /* write over previous capacity */
 void RoutingInst::setCap(edge e, int cap)
 {
+  /*
   edgeCapInitd[e] = true;
   edgeCap[e] = cap;
+  */
 }
 
 
@@ -309,7 +314,6 @@ route RoutingInst::bfs(point3d start, point3d goal)
         edge e = makeEdge(p, *it);
         if (!started[*it] &&
             !isBlocked[e] &&
-            getCap(e) >= 0 &&
             (*it).x >= 0  &&
             (*it).y >= 0) {
           prev[*it] = p;
