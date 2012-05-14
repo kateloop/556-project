@@ -96,15 +96,30 @@ void RoutingInst::solveRouting()
   sort(nets.begin(), nets.end(), &netCompByOverflow);
 
   int TOF = 0;
-  for (int i = 0; i < 1; i++) {
+  for (int i = 0; i < nets.size(); i++) {
     int ofl = nets[i].getOfl();
-    if (ofl > 0) {
-      TOF += ofl;
-      printf("%d\n", ofl);
-    }
-  }
+    if (ofl <= 0)
+      continue;
 
-  printf("TOF: %d\n", TOF);
+    printf("Re-routing net with %d overflow... ", ofl);
+
+    // Remove old route
+    nets[i].setRoute(route());
+    removeRoute(nets[i].getRoute());
+
+    // Find a new one
+    route r2d = route2d(nets[i], &RoutingInst::bfs);
+    route r3d = route3d(nets[i], r2d);
+    nets[i].setRoute(r3d);
+    nets[i].setOfl(getRouteOverflow(r3d));
+    addRoute(r3d);
+
+    int newOfl = nets[i].getOfl();
+    printf("found route with %d ofl\n", newOfl);
+
+    break;                      // DEBUG
+  }
+  printf("TOF: %d\n", getTotalOverflow());
 }
 
 
@@ -241,6 +256,17 @@ void RoutingInst::addRoute(route r)
     edge e = edges[i];
     int cap = getCap(e);
     setCap(e, cap-1);
+  }
+}
+
+// Adjust capacities by removing a route
+void RoutingInst::removeRoute(route r)
+{
+  vector<edge> edges = getDecomposedEdges(r);
+  for (int i = 0; i < edges.size(); i++) {
+    edge e = edges[i];
+    int cap = getCap(e);
+    setCap(e, cap+1);
   }
 }
 
@@ -405,7 +431,6 @@ route RoutingInst::bfs(point3d start, point3d goal)
 {
   route r;
   priority_queue<point3d, vector<point3d>, L2Comp> open((L2Comp(goal)));
-  //queue<point3d> open;
   map<point3d, bool> visited;
   map<point3d, point3d> prev;
   map<point3d, bool> started;
@@ -459,6 +484,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
           prev[*it] = p;
           started[*it] = true;
           open.push(*it);
+          printf("Trying %s\t\t::%d\n", edgeToString(e).c_str(), getCap(e));
         }
       }
     }

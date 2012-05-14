@@ -115,6 +115,7 @@ private:
   int getCap(edge e);
 
   void addRoute(route r);
+  void removeRoute(route r);
 
   int getTotalWireLength();
   int getTotalOverflow();
