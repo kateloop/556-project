@@ -43,7 +43,9 @@ public:
   {
     // Want shortest distance -> highest value
     // i.e. p1 value is less, if its distance is greater
-    return l2Dist(p1) > l2Dist(p2);
+    //return p1.z > p2.z;
+    return l2Dist(p1) + 1000 * p1.z > l2Dist(p2) + 1000 * p2.z;
+    //    return l2Dist(p1) > l2Dist(p2);
   }
   private:
   L2Comp();

@@ -92,12 +92,14 @@ void RoutingInst::solveRouting()
   /****************************************
    *  Rip-up and Re-route
    ****************************************/
+  /*
   // Sort nets by ofl
   sort(nets.begin(), nets.end(), &netCompByOverflow);
 
   int TOF = 0;
   for (int i = 0; i < nets.size(); i++) {
-    int ofl = nets[i].getOfl();
+    route original = nets[i].getRoute();
+    int ofl = getRouteOverflow(original);
     if (ofl <= 0)
       continue;
 
@@ -120,6 +122,7 @@ void RoutingInst::solveRouting()
     break;                      // DEBUG
   }
   printf("TOF: %d\n", getTotalOverflow());
+  */
 }
 
 
@@ -229,12 +232,12 @@ int RoutingInst::getCap(edge e)
   if (!edgeCapInitd2d[e]) {
     edgeCapInitd2d[e] = true;
     if (isVertical(e)) {
-      //      for (int i = 0; i < vCap.size(); i++)
-      for (int i = 0; i < 1; i++)
+      for (int i = 0; i < vCap.size(); i++)
+      //      for (int i = 0; i < 1; i++)
 	edgeCap2d[e] += vCap[i];
     } else {
-      //      for (int i = 0; i < hCap.size(); i++)
-      for (int i = 0; i < 1; i++)
+      for (int i = 0; i < hCap.size(); i++)
+      //      for (int i = 0; i < 1; i++)
 	edgeCap2d[e] += hCap[i];
     }
   }
@@ -285,14 +288,15 @@ int RoutingInst::getTotalWireLength()
 int RoutingInst::getRouteOverflow(route &r)
 {
   int ofl = 0;
-  for (int i = 0; i < r.size(); i++) {
-    edge e = r[i];
+  vector<edge> edges = getDecomposedEdges(r);
+  for (int i = 0; i < edges.size(); i++) {
+    edge e = edges[i];
     if (isVia(e))
       continue;
     else if (getCap(e) >= 0)
       continue;
     else
-      ofl += -getCap(e);
+      ofl++;
   }
   return ofl;
 }
@@ -436,6 +440,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
   map<point3d, bool> started;
   
   // Start at start
+  start.z = 0;                  // OVERFLOW
   open.push(start);
   prev[start] = start;
   started[start] = true;
@@ -446,7 +451,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
       open.pop();
       continue;
     }
-    
+
     // Mark visited
     point3d p = open.top(); open.pop();
     visited[p] = true;
@@ -476,15 +481,21 @@ route RoutingInst::bfs(point3d start, point3d goal)
       set<point3d> nextPoints = getNeighborPoints(p);
       
       for (set<point3d>::iterator it = nextPoints.begin(); it != nextPoints.end(); it++) {
-        edge e = makeEdge(p, *it);
-        if (!started[*it] &&
+        point3d next = *it;
+        edge e = makeEdge(p, next);
+        if (!started[next] &&
             !isBlocked[e] &&
-            (*it).x >= 0  &&
-            (*it).y >= 0) {
-          prev[*it] = p;
-          started[*it] = true;
-          open.push(*it);
-          printf("Trying %s\t\t::%d\n", edgeToString(e).c_str(), getCap(e));
+            next.x >= 0  &&
+            next.y >= 0) {
+          int cap = getCap(e);
+          int ofl = 0;
+          if (cap <= 0)
+            ofl++;
+          next.z = p.z + ofl;
+          prev[next] = p;
+          started[next] = true;
+          open.push(next);
+          //          printf("Trying %s\t\t::%d\n", edgeToString(e).c_str(), next.z);
         }
       }
     }
