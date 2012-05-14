@@ -119,6 +119,9 @@ private:
   void setCap(edge e, int cap);
   int getCap(edge e);
 
+  int getTotalWireLength();
+  int getTotalOverflow();
+
   /****************************************
    *  3D routing
    ****************************************/

@@ -44,6 +44,10 @@ bool operator<(point3d p1, point3d p2);
 bool operator==(point3d p1, point3d p2);
 bool operator!=(point3d p1, point3d p2);
 
+bool lessThan3d(point3d p1, point3d p2);
+bool equal3d(point3d p1, point3d p2);
+bool nequal3d(point3d p1, point3d p2);
+
 /********************************************************************************
  *  Maps
  ********************************************************************************/
@@ -67,6 +71,33 @@ class edgeComp2d {
     return ep1 < ep2;
   }
 };
+
+class edgeComp3d {
+ public: 
+  bool operator()(const edge e1, const edge e2)
+  {
+    edge ep1, ep2;
+
+    // Normalize points
+    if (lessThan3d(e1.first,e1.second)) {
+      ep1 = edge(e1.second, e1.first);
+    } else {
+      ep1 = e1;
+    }
+    if (lessThan3d(e2.first, e2.second)) {
+      ep2 = edge(e2.second, e2.first);
+    } else {
+      ep2 = e2;
+    }
+    
+    // Compare
+    if (nequal3d(ep1.first, ep2.first))
+      return lessThan3d(ep1.first, ep2.first);
+    else
+      return lessThan3d(ep1.second, ep2.second);
+  }
+};
+
 
 
 

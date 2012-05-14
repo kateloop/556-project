@@ -65,6 +65,9 @@ void RoutingInst::solveRouting()
     // Set this nets route
     nets[i].setRoute(r3d);
   }
+
+  // Check total wirelength
+  printf("Total wirelength: %d\n", getTotalWireLength());
 }
 
 
@@ -194,6 +197,16 @@ void RoutingInst::setCap(edge e, int cap)
   edgeCapInitd[e] = true;
   edgeCap[e] = cap;
   */
+}
+
+int RoutingInst::getTotalWireLength()
+{
+  return 0;
+}
+
+int RoutingInst::getTotalOverflow()
+{
+  return 0;
 }
 
 
