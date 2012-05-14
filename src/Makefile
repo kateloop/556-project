@@ -12,7 +12,7 @@ CCC = g++
 # ---------------------------------------------------------------------         
 
 #CCOPT = -m64 -O -fPIC -fexceptions -DNDEBUG -DIL_STD -g -Wall
-CCOPT = -O3 -m64
+CCOPT = -O3 -m64  -std=c++0x
 
 # ---------------------------------------------------------------------         
 # Link options and libraries                                                    

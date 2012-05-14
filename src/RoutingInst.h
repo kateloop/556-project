@@ -98,15 +98,16 @@ private:
    *  Problem definition
    ****************************************/
   /* Nets */
-  vector<Net> nets;		/* Nets to solve */
+  vector<Net> nets;             // Nets to solve
 	
   /* Blockages */
-  vector<blockage> blockages;	/* Blockages */
-  map<edge, bool, edgeComp> isBlocked; /* Blockage lookup */
+  vector<blockage> blockages;            /* Blockages */
+  map<edge, bool, edgeComp2d> isBlocked; /* Blockage lookup */
 
   /* Edge capacities */
-  map<edge, int, edgeComp> edgeCap; /* 2D edge capacity utilization (Global routing grid) */
-  map<edge, bool, edgeComp> edgeCapInitd; /* Edge capacity initialized */
+  map<edge, int, edgeComp2d> edgeCap2d;       // 2 dimensional edge capacities
+  map<edge, bool, edgeComp2d> edgeCapInitd2d; // 2 dimensional cap initialization
+
   int totalOverflow;                      // Total overflow count
   int totalWireLength;                    // Total wirelength
 

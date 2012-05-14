@@ -27,21 +27,27 @@ using std::string;
  */
 typedef pair<point3d, point3d> edge;
 
+/*
+ * Debug printing
+ */
 extern string edgeToString(edge e);
-
-
 
 /**
  *  A route
  **/
 typedef vector<edge> route;
 
+/*
+ *  Point comparisons
+ */
 bool operator<(point3d p1, point3d p2);
 bool operator==(point3d p1, point3d p2);
 bool operator!=(point3d p1, point3d p2);
 
-// Edge comparison function for maps
-class edgeComp {
+/********************************************************************************
+ *  Maps
+ ********************************************************************************/
+class edgeComp2d {
  public: 
   bool operator()(const edge e1, const edge e2)
   {
@@ -61,6 +67,7 @@ class edgeComp {
     return ep1 < ep2;
   }
 };
+
 
 
 /********************************************************************************

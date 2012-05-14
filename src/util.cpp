@@ -29,9 +29,17 @@ point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight)
   return p;
 }
 
+
+
 /********************************************************************************
  *   Edges
  ********************************************************************************/
+
+bool operator==(edge e1, edge e2)
+{
+  return e1.first == e2.first && e1.second == e2.second;
+}
+
 edge makeEdge(point3d p1, point3d p2)
 {
   edge e;
@@ -53,6 +61,9 @@ string edgeToString(edge e)
   return string(buff);
 }
 
+/********************************************************************************
+ *  Points
+ ********************************************************************************/
 /* operator< - used to compare points (only considers 2d) */
 bool operator<(point3d p1, point3d p2)
 {
