@@ -56,6 +56,9 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
 void RoutingInst::solveRouting()
 {
   for (int i = 0; i < nets.size(); i++) {
+    // Reorder this nets pins
+    nets[i].reorderPins();
+
     // Find initial 2d solution
     route r2d = route2d(nets[i]);
 
