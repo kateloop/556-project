@@ -122,6 +122,11 @@ private:
   int getTotalWireLength();
   int getTotalOverflow();
 
+  int getRouteWireLength(route &r);
+
+  vector<edge> getDecomposedEdges(route &r);
+  vector<edge> getDecomposedEdge(edge &e);
+
   /****************************************
    *  3D routing
    ****************************************/

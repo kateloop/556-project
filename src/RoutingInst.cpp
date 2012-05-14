@@ -202,9 +202,15 @@ void RoutingInst::setCap(edge e, int cap)
   */
 }
 
+// Returns the 3D wirelength for all nets' routes
 int RoutingInst::getTotalWireLength()
 {
-  return 0;
+  int wl = 0;
+  for (int i = 0; i < nets.size(); i++) {
+    route r = nets[i].getRoute();
+    wl += getRouteWireLength(r);
+  }
+  return wl;
 }
 
 int RoutingInst::getTotalOverflow()
@@ -212,6 +218,59 @@ int RoutingInst::getTotalOverflow()
   return 0;
 }
 
+// Returns wirelength for this route
+int RoutingInst::getRouteWireLength(route &r)
+{
+  int wl = 0;
+  vector<edge> edges = getDecomposedEdges(r);
+  return edges.size();
+}
+
+// Returns edges of length 1 (breaks edges of length > 1 down) given route
+vector<edge> RoutingInst::getDecomposedEdges(route &r)
+{
+  vector<edge> edges;
+  for (int i = 0; i < r.size(); i++) {
+    vector<edge> decomposed = getDecomposedEdge(r[i]);
+    for (int j = 0; j < decomposed.size(); j++) {
+      edges.push_back(decomposed[j]);
+    }
+  }
+  return edges;
+}
+
+// Returns edges of length 1 given an edge
+vector<edge> RoutingInst::getDecomposedEdge(edge &e)
+{
+  vector <edge> edges;
+  if (isVertical(e)) {
+    int starty = min(e.first.y, e.second.y);
+    int endy   = max(e.first.y, e.second.y);
+    for (int y = starty; y < endy; y++) {
+      point3d pfirst, psecond;
+      pfirst.x = e.first.x;
+      pfirst.y = y;
+      psecond.x = e.first.x;
+      psecond.y = y+1;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else if (isHorizontal(e)) {
+    int startx = min(e.first.x, e.second.x);
+    int endx   = max(e.first.x, e.second.x);
+    for (int x = startx; x < endx; x++) {
+      point3d pfirst, psecond;
+      pfirst.x = x;
+      pfirst.y = e.first.y;
+      psecond.x = x+1;
+      psecond.y = e.second.y;
+      edges.push_back(edge(pfirst, psecond));
+    }
+  } else {                      // Via
+    for (int i = 0; i < abs((double)e.first.z - e.second.z); i++)
+      edges.push_back(e);
+  }
+  return edges;
+}
 
 /********************************************************************************
  *  2D Routing Algorithms
