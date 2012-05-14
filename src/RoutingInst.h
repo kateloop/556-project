@@ -105,6 +105,9 @@ private:
   map<edge, int, edgeComp2d> edgeCap2d;       // 2 dimensional edge capacities
   map<edge, bool, edgeComp2d> edgeCapInitd2d; // 2 dimensional cap initialization
 
+  map<edge, vector<int>, edgeComp2d> zCap; // Per-layer capacities
+  map<edge, bool, edgeComp2d> zCapInitd;   // Per-layer initialized
+
   int totalOverflow;                      // Total overflow count
   int totalWireLength;                    // Total wirelength
 
@@ -115,6 +118,9 @@ private:
   /* Safely set and get capacities */
   void setCap(edge e, int cap);
   int getCap(edge e);
+
+  void setZCap(edge e, int layer, int cap);
+  vector<int>& getZCap(edge e);
 
   void addRoute(route r);
   void removeRoute(route r);
@@ -135,8 +141,8 @@ private:
   route route3d(Net&, route r);
 
   /* Get a suitable vertical or horizontal layer */
-  int getVLayer();
-  int getHLayer();
+  int getVLayer(edge e);
+  int getHLayer(edge e);
 
   /****************************************
    *  2D routing

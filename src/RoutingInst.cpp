@@ -149,24 +149,11 @@ route RoutingInst::route3d(Net &n, route r)
 {
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
-  vLayer = getVLayer();
-  hLayer = getHLayer();
   
   // Insert necessary vias between edges 
   for (int i = 0; i < r.size(); i++) {
     // Grab the current edge
     edge &e = r[i];
-    
-    // Set layer for this type of edge
-    if (isVertical(e)) {
-      e.first.z = vLayer;
-      e.second.z = vLayer;
-    } else if (isHorizontal(e)) {
-      e.first.z = hLayer;
-      e.second.z = hLayer;      
-    } else {
-      printf("Non horizontal/vertical edge\n");
-    }
     
     // If the previous edge was on a different layer, add a via
     if (i > 0) {		// Not needed on first edge
@@ -198,8 +185,17 @@ route RoutingInst::route3d(Net &n, route r)
 
 
 // Get a free vertical layer
-int RoutingInst::getVLayer() {
+int RoutingInst::getVLayer(edge e) {
   int vLayer = -1;
+
+  vector<int> &caps = getZCap(e);
+
+  // Try to find a valid layer first
+  for (int i = 0; i < caps.size(); i++)
+    if (caps[i] > 0)
+      return i;
+
+  // Else, return a default one
   for (int i = 0; i < vCap.size(); i++) {
     if (vCap[i]) {
       vLayer = i;
@@ -210,8 +206,17 @@ int RoutingInst::getVLayer() {
 }
 
 // Get a free horizontal layer
-int RoutingInst::getHLayer() {
+int RoutingInst::getHLayer(edge e) {
   int hLayer = -1;
+
+  vector<int> &caps = getZCap(e);
+
+  // Try to find a valid layer first
+  for (int i = 0; i < caps.size(); i++) {
+    if (caps[i] > 0)
+      return i;
+  }
+
   for (int i = 0; i < hCap.size(); i++) {
     if (hCap[i]) {
       hLayer = i;
@@ -249,6 +254,27 @@ void RoutingInst::setCap(edge e, int cap)
 {
   edgeCapInitd2d[e] = true;
   edgeCap2d[e] = cap;
+}
+
+void RoutingInst::setZCap(edge e, int layer, int cap)
+{
+  zCapInitd[e] = true;
+  zCap[e][layer] = cap;
+}
+
+vector<int>& RoutingInst::getZCap(edge e)
+{
+  // Initialize if necessary
+  if (!zCapInitd[e]) {
+    zCapInitd[e] = true;
+    if (isVertical(e))
+      zCap[e] = vector<int> (vCap);
+    else if (isHorizontal(e))
+      zCap[e] = vector<int> (hCap);
+    else
+      zCap[e] = vector<int> (9999999);
+  }
+  return zCap[e];
 }
 
 // Adjust capacities for new route
@@ -394,6 +420,20 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
         else
           r.push_back(e);
       }
+    }
+  }
+
+  // Z layer assignment
+  for (int i = 0; i < r.size(); i++) {
+    edge &e = r[i];
+    if (isVertical(e)) {
+      int vLayer = getVLayer(e);
+      e.first.z = vLayer;
+      e.second.z = vLayer;
+    } else if (isHorizontal(e)) {
+      int hLayer = getHLayer(e);
+      e.first.z = hLayer;
+      e.second.z = hLayer;          
     }
   }
   return r;
