@@ -118,5 +118,6 @@ string edgeToString(edge e);
 
 bool isVertical(edge e);
 bool isHorizontal(edge e);
+bool isVia(edge e);
 
 #endif

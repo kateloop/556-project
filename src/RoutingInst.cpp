@@ -67,6 +67,8 @@ void RoutingInst::solveRouting()
 
     // Set this nets route
     nets[i].setRoute(r3d);
+    // Adjust internal capacities
+    addRoute(r3d);
   }
 
   // Check total wirelength
@@ -201,6 +203,17 @@ void RoutingInst::setCap(edge e, int cap)
   edgeCap2d[e] = cap;
 }
 
+// Adjust capacities for new route
+void RoutingInst::addRoute(route r)
+{
+  vector<edge> edges = getDecomposedEdges(r);
+  for (int i = 0; i < edges.size(); i++) {
+    edge e = edges[i];
+    int cap = getCap(e);
+    setCap(e, cap-1);
+  }
+}
+
 // Returns the 3D wirelength for all nets' routes
 int RoutingInst::getTotalWireLength()
 {
@@ -212,20 +225,20 @@ int RoutingInst::getTotalWireLength()
   return wl;
 }
 
+// Returns the sum of negative edge capacities that are not vias
 int RoutingInst::getTotalOverflow()
 {
   int ofl = 0;
-  for (int i = 0; i < nets.size(); i++) {
-    route r = nets[i].getRoute();
-    vector<edge> edges = getDecomposedEdges(r);
-    for (int j = 0; j < edges.size(); j++) {
-      edge e = edges[j];
-      int cap = getCap(e);
-      if (cap <= 0 && (isVertical(e) || isHorizontal(e)))
-        ofl++;
-      setCap(e, cap-1);
-    }
-  }
+  for (map<edge, int>::iterator it = edgeCap2d.begin(); it != edgeCap2d.end(); it++) {
+    edge e = (*it).first;
+    int cap = (*it).second;
+
+    // Vias have infinite capacity
+    if (isVia(e))
+      ofl++;
+    else if (cap < 0)
+      ofl += -cap;
+  }    
   return ofl;
 }
 

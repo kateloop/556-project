@@ -1,3 +1,4 @@
+
 // ECE556 - Copyright 2011 University of Wisconsin-Madison.  All Rights Reserved.
 // $HeadURL:  $
 // $Id: util.cpp 152 2011-01-19 02:05:45Z shojaei $
@@ -119,4 +120,9 @@ bool isVertical(edge e)
 bool isHorizontal(edge e)
 {
   return e.first.x != e.second.x;
+}
+
+bool isVia(edge e)
+{
+  return !isVertical(e) & !isHorizontal(e);
 }
