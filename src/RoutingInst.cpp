@@ -10,6 +10,10 @@
 
 using namespace std;
 
+
+/********************************************************************************
+ *  RoutingInst construction 
+ ********************************************************************************/
 RoutingInst::RoutingInst (int xGrid, int yGrid, int zGrid, vector<int> &vCap, vector<int> &hCap, int llx, int lly, int tWidth, int tHeight) :
   xGrid(xGrid), 
   yGrid(yGrid),
@@ -40,112 +44,32 @@ void RoutingInst::addBlockage(point3d p1, point3d p2, int cap)
   b.second = cap;
   blockages.push_back(b);
   isBlocked[e] = true;
-
-  // Adjust capacities for this edge
-  /*
-    TODO : Are blockages only on layer 1?
-    
-    if (isVertical(e)) {
-    rcap -= vCap[e.first.z - 1]; // z index starts at 1..
-    rcap += cap;
-    } else { // horizontal
-    rcap -= hCap[e.first.z - 1]; // z index starts at 1..
-    rcap += cap;
-    }
-  */
   setCap(e, cap);
 }
 
 
-/********************************************************************************
- *  solveRouting - Prepares routing tasks to solve this routing instance
- ********************************************************************************/
-#define MAXTHREADS 10
-int NUMTHREADS = 1;
 
+/********************************************************************************
+ *  solveRouting - Solves this RoutingInst
+ ********************************************************************************/
 void RoutingInst::solveRouting()
 {
-  pthread_t threads[MAXTHREADS];
-  int iret[MAXTHREADS];
-  routeTask tasks[MAXTHREADS];
-
-  printf("Routing %d nets\n", nets.size());
-  // Do initial routing
-  for (int i = 0; i < NUMTHREADS; i++) {
-    routeTask rt;
-    tasks[i].rst = this;
-    tasks[i].modulo = i;
-    tasks[i].threads = NUMTHREADS;
-    while (iret[i] = pthread_create(&threads[i], NULL, &doRoutingTask, (void *)&tasks[i])) {
-      perror("Creating threads\n");
-    }
-  }
-
-  for (int i = 0; i < NUMTHREADS; i++)
-    pthread_join(threads[i], NULL);
-
-  // Set overflows for each Net
   for (int i = 0; i < nets.size(); i++) {
-    int ofl = getNetOfl(nets[i]);
-    nets[i].setOfl(ofl);
-  }
+    // Find initial 2d solution
+    route r2d = route2d(nets[i]);
 
-  /*
-  // Rip-up, and re-route
-  sort(nets.begin(), nets.end(), netCompByOfl);
-  for (int i = 0; i < 1; i++) {
-    route r = nets[i].getRoute();
-    int preOflCount = nets[i].getOfl();
-    printf("Start with %d overflow, and %d tof\n", preOflCount, totalOverflow);
-    removeRoute(r);
-    printf("Total overflow is now %d\n", totalOverflow);
+    // Find 3d solution
+    route r3d = route3d(nets[i], r2d);
 
-    printf("Re-routing with bfs\n");
-    route rp = findRoute(nets[i], &RoutingInst::bfs);
-    nets[i].setRoute(rp);
-    nets[i].setOfl(getNetOfl(nets[i]));
-    int postOflCount = nets[i].getOfl();
-    printf("Post is %d\n", postOflCount);
-  }
-  */
-  
-  printf("Total overflow: %d\t Total wirelength: %d\n", totalOverflow, totalWireLength);
-}
-
-// Threaded task
-
-pthread_mutex_t netLock = PTHREAD_MUTEX_INITIALIZER;
-
-void *doRoutingTask(void *task)
-{
-  routeTask *rt = (routeTask *)task;
-  RoutingInst *rst = rt->rst;
-  int modulo = rt->modulo;
-  int threads = rt->threads;
-
-  printf("Routing %d, %d\n", modulo, threads);
-  fflush(stdout);
-  
-  // Initial Routing Instance
-  for (int i = 0; i < rst->nets.size(); i++) {
-    if (i % threads == modulo) {
-      rst->nets[i].reorderPins();
-      route r = rst->findRoute(rst->nets[i]);
-
-      pthread_mutex_lock(&netLock);
-      rst->addRoute(r);                       // Adjust routing grid capacities
-      rst->nets[i].setRoute(r);               // Add route to Net
-
-      pthread_mutex_unlock(&netLock);
-    }
-
-    // Print status update
-    int res = 500;
-    if (i % res == 0)
-      printf("(%d/%d) routed\n", i, rst->nets.size());
+    // Set this nets route
+    nets[i].setRoute(r3d);
   }
 }
 
+
+/********************************************************************************
+ *  Output
+ ********************************************************************************/
 void RoutingInst::printRoute(char *outFile)
 {
   FILE *of = fopen(outFile, "w");
@@ -158,11 +82,12 @@ void RoutingInst::printRoute(char *outFile)
   }
 }
 
-route RoutingInst::findRoute(Net &n, route (RoutingInst::*routePins)(point3d, point3d))
+
+/********************************************************************************
+ *  3D Routing
+ ********************************************************************************/
+route RoutingInst::route3d(Net &n, route r)
 {
-  // Find a route on the 2d routing grid
-  route r = route2d(n, routePins);
-  
   // Find a suitable vertical and horizontal layer
   int vLayer, hLayer;
   vLayer = getVLayer();
@@ -212,6 +137,35 @@ route RoutingInst::findRoute(Net &n, route (RoutingInst::*routePins)(point3d, po
   return r;
 }
 
+
+// Get a free vertical layer
+int RoutingInst::getVLayer() {
+  int vLayer = -1;
+  for (int i = 0; i < vCap.size(); i++) {
+    if (vCap[i]) {
+      vLayer = i;
+      break;
+    }
+  }
+  return vLayer;
+}
+
+// Get a free horizontal layer
+int RoutingInst::getHLayer() {
+  int hLayer = -1;
+  for (int i = 0; i < hCap.size(); i++) {
+    if (hCap[i]) {
+      hLayer = i;
+      break;
+    }
+  }
+  return hLayer;
+}
+
+
+/********************************************************************************
+ *  2D Routing Grid
+ ********************************************************************************/
 /* get capacity of edge, initialize if needed */
 int RoutingInst::getCap(edge e)
 {
@@ -236,19 +190,12 @@ void RoutingInst::setCap(edge e, int cap)
   edgeCap[e] = cap;
 }
 
-bool RoutingInst::isVertical(edge e)
-{
-  return e.first.y != e.second.y;
-}
-
-bool RoutingInst::isHorizontal(edge e)
-{
-  return e.first.x != e.second.x;
-}
 
 /********************************************************************************
- *  Routing Algorithms
+ *  2D Routing Algorithms
  ********************************************************************************/
+
+// Get a route for this net in the 2D routing grid using the pin router
 route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d))
 {
   route r;
@@ -277,6 +224,7 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
   return r;
 }
 
+// Route two pins using l-shapes
 route RoutingInst::lshape(point3d start, point3d goal)
 {
   // Connect horizontal, then vertical
@@ -307,6 +255,7 @@ route RoutingInst::lshape(point3d start, point3d goal)
   return r;
 }
 
+// Route two pins using bfs
 route RoutingInst::bfs(point3d start, point3d goal)
 {
   route r;
@@ -374,6 +323,34 @@ route RoutingInst::bfs(point3d start, point3d goal)
 }
 
 
+// Find neighboring points - used to generate next-search locations in routing
+set<point3d> RoutingInst::getNeighborPoints(point3d p)
+{
+  set<point3d> pts;
+  point3d up, left, down, right;
+  up.x = down.x = p.x;          // Up/Down    same X
+  left.y = right.y = p.y;       // Left/Right same Y
+  up.y = p.y + 1;               // Up
+  down.y = p.y - 1;             // Down
+  right.x = p.x + 1;            // Right
+  left.x = p.x - 1;             // Left
+
+  pts.insert(up);
+  pts.insert(left);
+  pts.insert(down);
+  pts.insert(right);
+
+  return pts;
+}
+
+
+
+
+
+
+
+
+
 /********************************************************************************
  *  Debug printing
  ********************************************************************************/
@@ -429,164 +406,7 @@ void RoutingInst::printInput()
   }
 }
 
-int RoutingInst::getVLayer() {
-  int vLayer = -1;
-  for (int i = 0; i < vCap.size(); i++) {
-    if (vCap[i]) {
-      vLayer = i;
-      break;
-    }
-  }
-  return vLayer;
-}
-
-int RoutingInst::getHLayer() {
-  int hLayer = -1;
-  for (int i = 0; i < hCap.size(); i++) {
-    if (hCap[i]) {
-      hLayer = i;
-      break;
-    }
-  }
-  return hLayer;
-}
-
 void RoutingInst::printGPins(vector<point3d> &gPins) {
   for (int i = 0; i < gPins.size(); i++)
     printf("%d, %d, %d\n", gPins[i].x, gPins[i].y, gPins[i].z);
-}
-
-set<point3d> RoutingInst::getNeighborPoints(point3d p)
-{
-  set<point3d> pts;
-  point3d up, left, down, right;
-  up.x = down.x = p.x;          // Up/Down    same X
-  left.y = right.y = p.y;       // Left/Right same Y
-  up.y = p.y + 1;               // Up
-  down.y = p.y - 1;             // Down
-  right.x = p.x + 1;            // Right
-  left.x = p.x - 1;             // Left
-
-  pts.insert(up);
-  pts.insert(left);
-  pts.insert(down);
-  pts.insert(right);
-
-  return pts;
-}
-
-void RoutingInst::addRoute(route r)
-{
-  // Calculate this route's wirelength and capacity adjustments
-  for (int i = 0; i < r.size(); i++) {
-    edge e = r[i];
-    addWireLength(e);
-    addCap(e);
-  }
-}
-
-void RoutingInst::removeRoute(route r)
-{
-  for (int i = 0; i < r.size(); i++) {
-    edge e = r[i];
-    removeWireLength(e);
-    removeCap(e);
-  }
-}
-
-void RoutingInst::addWeightedCap(edge e, int weight)
-{
-  vector<edge> edges = getDecomposedEdge(e);
-  for (int i = 0; i < edges.size(); i++) {
-    // Vias have infinite capacity
-    if (!isVertical(e) && !isHorizontal(e))
-      continue;
-    int cap = getCap(edges[i]);
-    if (cap < 0) {
-      totalOverflow += weight;
-    }
-    setCap(edges[i], cap - weight);
-  }
-}
-
-void RoutingInst::addCap(edge e)
-{
-  addWeightedCap(e,1);
-}
-
-void RoutingInst::removeCap(edge e)
-{
-  addWeightedCap(e,-1);
-}
-
-void RoutingInst::addWeightedWireLength(edge e, int weight)
-{
-  if (isVertical(e)) {
-    totalWireLength += weight * abs((double)e.first.y - e.second.y);
-  } else if (isHorizontal(e)) {
-    totalWireLength += weight * abs((double)e.first.x - e.second.x);
-  } else {                    // via
-    totalWireLength += weight * abs((double)e.first.z - e.second.z);
-  }
-}
-
-void RoutingInst::addWireLength(edge e)
-{
-  addWeightedWireLength(e);
-}
-
-void RoutingInst::removeWireLength(edge e)
-{
-  addWeightedWireLength(e, -1);
-}
-
-vector<edge> RoutingInst::getDecomposedEdge(edge e)
-{
-  vector <edge> edges;
-  if (isVertical(e)) {
-    int starty = min(e.first.y, e.second.y);
-    int endy   = max(e.first.y, e.second.y);
-    for (int y = starty; y < endy; y++) {
-      point3d pfirst, psecond;
-      pfirst.x = e.first.x;
-      pfirst.y = y;
-      psecond.x = e.first.x;
-      psecond.y = y+1;
-      edges.push_back(edge(pfirst, psecond));
-    }
-  } else if (isHorizontal(e)) {
-    int startx = min(e.first.x, e.second.x);
-    int endx   = max(e.first.x, e.second.x);
-    for (int x = startx; x < endx; x++) {
-      point3d pfirst, psecond;
-      pfirst.x = x;
-      pfirst.y = e.first.y;
-      psecond.x = x+1;
-      psecond.y = e.second.y;
-      edges.push_back(edge(pfirst, psecond));
-    }
-  } else {                      // Via
-    edges.push_back(e);
-  }
-  return edges;
-}
-
-bool netCompByOfl(Net n1, Net n2)
-{
-  return n1.getOfl() > n2.getOfl();
-}
-
-int RoutingInst::getNetOfl(Net &n)
-{
-  route r = n.getRoute();
-  int ofl = 0;
-  for (int j = 0; j < r.size(); j++) {
-    edge e = r[j];
-    vector<edge> edges = getDecomposedEdge(e);
-    for (int k = 0; k < edges.size(); k++) {
-      if (edgeCap[edges[k]] < 0)
-        ofl++;
-      }
-  }
-  return ofl;
 }

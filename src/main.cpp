@@ -4,9 +4,9 @@
 
 
 /*! \file main.cpp
-    \brief source code for the ECE556 API.
+  \brief source code for the ECE556 API.
     
-    Details.
+  Details.
 */
 
 #include "ece556.h"
@@ -16,36 +16,28 @@ extern int NUMTHREADS;
 
 int main(int argc, char **argv)
 {
- 	if(argc != 3 && 
-           argc != 4){
- 		printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> [numThreads]\n");
- 		return 1;
- 	}
+  if (argc != 3) {
+    printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name>\n");
+    return 1;
+  }
 
- 	int status;
-	char *inputFileName = argv[1];
- 	char *outputFileName = argv[2];
+  int status;
+  char *inputFileName = argv[1];
+  char *outputFileName = argv[2];
+  RoutingInst *rst;
 
-        if (argc == 4) {
-          NUMTHREADS = atoi(argv[3]);
-          printf("Running with %d threads\n", NUMTHREADS);
-        }
+  /// read benchmark
+  rst = readBenchmark(inputFileName);
 
+  // solve routing
+  rst->solveRouting();
 
-	RoutingInst *rst;
+  // print result to file
+  rst->printRoute(outputFileName);
 
- 	/// read benchmark
- 	rst = readBenchmark(inputFileName);
+  // release memory
+  delete rst;
 
-	// solve routing
-	rst->solveRouting();
-
-	// print result to file
-	rst->printRoute(outputFileName);
-
-	// release memory
-	delete rst;
-
- 	printf("\nDONE!\n");	
- 	return 0;
+  printf("\nDONE!\n");	
+  return 0;
 }

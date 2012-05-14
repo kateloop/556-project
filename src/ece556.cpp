@@ -14,7 +14,7 @@ RoutingInst* readBenchmark(const char *fileName) {
   ifstream inf;
   inf.open(fileName, ifstream::in);
 
-  RoutingInst *rst;
+  RoutingInst *rst = NULL;
   int xGrid, yGrid, zGrid;	// Global routing grid dimensions
   vector<int> *vCap, *hCap;       // Default vertical and horizontal capacity for each layer 
   int llx, lly;			// Lower left {x,y} for global routing grid

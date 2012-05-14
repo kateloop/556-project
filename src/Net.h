@@ -37,7 +37,6 @@ class Net {
   
   /*Public functions*/
   void addPin(point3d pin);
-  void printInput();
   void setRoute(route r);
   route getRoute();
   void setOfl(int ofl);
@@ -48,6 +47,7 @@ class Net {
 
   /* Output */
   void printRoute(FILE *of);
+  void printInput();
 
   /* Get global routing grid pins */
   vector<point3d> &getGPins();

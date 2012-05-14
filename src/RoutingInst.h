@@ -110,18 +110,6 @@ private:
   int totalOverflow;                      // Total overflow count
   int totalWireLength;                    // Total wirelength
 
-  void addRoute(route r);       // Adjust routing cap/wirelength for a route 
-  void removeRoute(route r);    // Remove routing cap/wirelength for a route
-
-  void addCap(edge e);          // Add/Remove capacity for an edge
-  void removeCap(edge e);
-  void addWireLength(edge e);   // Add/Remove wirelength for an edge
-  void removeWireLength(edge e);
-
-  void addWeightedCap(edge e, int weight=1);
-  void addWeightedWireLength(edge e, int weight=1);
-
-  int getNetOfl(Net &n);         // Returns the number of edges with overflow on this net
 
   /****************************************
    *  Internal functions
@@ -130,25 +118,21 @@ private:
   void setCap(edge e, int cap);
   int getCap(edge e);
 
-  /* Is an edge vertical or horizontal */
-  bool isVertical(edge e);
-  bool isHorizontal(edge e);
-
-  /* Break an edge into segments of length 1 */
-  vector<edge> getDecomposedEdge(edge e);
+  /****************************************
+   *  3D routing
+   ****************************************/
+  // Find a 3-dimensional (complete) route
+  route route3d(Net&, route r);
 
   /* Get a suitable vertical or horizontal layer */
   int getVLayer();
   int getHLayer();
 
   /****************************************
-   *  Routing Algorithms
+   *  2D routing
    ****************************************/
-  // Find a 3-dimensional (complete) route
-  route findRoute(Net&, route (RoutingInst::*routePins)(point3d, point3d)=&RoutingInst::lshape);
-
   // Find a 2-dimensional (global routing grid) route
-  route route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d));
+  route route2d(Net &n, route (RoutingInst::*routePins)(point3d, point3d)=&RoutingInst::lshape);
 
   // Route 2 pins together
   route bfs(point3d start, point3d goal);
@@ -160,15 +144,3 @@ private:
 };
 
 #endif // ROUTINGINST_H
-
-/********************************************************************************
- *  Threading
- ********************************************************************************/
-/* Threaded routing task */
-typedef struct {
-  RoutingInst *rst;
-  int modulo;
-  int threads;
-} routeTask;
-
-void *doRoutingTask(void *);    

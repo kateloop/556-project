@@ -78,4 +78,7 @@ point3d gtop(point3d g, int llx, int lly, int tWidth, int tHeight);
 edge makeEdge(point3d p1, point3d p2);
 string edgeToString(edge e);
 
+bool isVertical(edge e);
+bool isHorizontal(edge e);
+
 #endif

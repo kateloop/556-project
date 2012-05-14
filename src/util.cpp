@@ -73,3 +73,17 @@ bool operator!=(point3d p1, point3d p2)
 {
   return !(p1 == p2);
 }
+
+
+/********************************************************************************
+ *  Miscellaneous utilities
+ ********************************************************************************/
+bool isVertical(edge e)
+{
+  return e.first.y != e.second.y;
+}
+
+bool isHorizontal(edge e)
+{
+  return e.first.x != e.second.x;
+}
