@@ -120,6 +120,7 @@ private:
   int getCap(edge e);
 
   void setZCap(edge e, int layer, int cap);
+  int getZCap(edge e, int layer);
   vector<int>& getZCap(edge e);
 
   void addRoute(route r);

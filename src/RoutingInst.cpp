@@ -10,6 +10,8 @@
 
 using namespace std;
 
+int DEBUG_OFL = 0;
+
 bool netCompByOverflow(Net n1, Net n2)
 {
   return n1.getOfl() > n2.getOfl();
@@ -87,6 +89,7 @@ void RoutingInst::solveRouting()
   printf("=== Before Rip-up and Re-route ===\n");
   printf("Total wirelength: %d\n", getTotalWireLength());
   printf("Total overflow: %d\n", getTotalOverflow());
+  printf("Debug overflow: %d\n", DEBUG_OFL);
   printf("==================================\n\n");
 
   /****************************************
@@ -196,6 +199,7 @@ int RoutingInst::getVLayer(edge e) {
       return i;
 
   // Else, return a default one
+  DEBUG_OFL++;
   for (int i = 0; i < vCap.size(); i++) {
     if (vCap[i]) {
       vLayer = i;
@@ -217,6 +221,8 @@ int RoutingInst::getHLayer(edge e) {
       return i;
   }
 
+  // Else, return a default one
+  DEBUG_OFL++;
   for (int i = 0; i < hCap.size(); i++) {
     if (hCap[i]) {
       hLayer = i;
@@ -256,10 +262,15 @@ void RoutingInst::setCap(edge e, int cap)
   edgeCap2d[e] = cap;
 }
 
+int RoutingInst::getZCap(edge e, int layer)
+{
+  return zCap[e][layer];
+}
+
 void RoutingInst::setZCap(edge e, int layer, int cap)
 {
   zCapInitd[e] = true;
-  zCap[e][layer] = cap;
+  zCap[e][layer] = zCap[e][layer] - 1;
 }
 
 vector<int>& RoutingInst::getZCap(edge e)
@@ -285,6 +296,12 @@ void RoutingInst::addRoute(route r)
     edge e = edges[i];
     int cap = getCap(e);
     setCap(e, cap-1);
+
+    if (!isVia(e)) {
+      int cap = getZCap(e, e.first.z);
+      printf("Edge %s has cap %d\n", edgeToString(e).c_str(), cap);
+      setZCap(e, e.first.z, cap-1);
+    }
   }
 }
 
@@ -372,7 +389,10 @@ vector<edge> RoutingInst::getDecomposedEdge(edge &e)
       pfirst.y = y;
       psecond.x = e.first.x;
       psecond.y = y+1;
-      edges.push_back(edge(pfirst, psecond));
+      if (starty == e.first.y)
+        edges.push_back(edge(pfirst, psecond));
+      else
+        edges.insert(edges.begin(), edge(psecond, pfirst));
     }
   } else if (isHorizontal(e)) {
     int startx = min(e.first.x, e.second.x);
@@ -382,8 +402,12 @@ vector<edge> RoutingInst::getDecomposedEdge(edge &e)
       pfirst.x = x;
       pfirst.y = e.first.y;
       psecond.x = x+1;
-      psecond.y = e.second.y;
-      edges.push_back(edge(pfirst, psecond));
+      psecond.y = e.first.y;
+      if (startx == e.first.x)
+        edges.push_back(edge(pfirst, psecond));
+      else
+        edges.insert(edges.begin(), edge(psecond, pfirst));
+
     }
   } else {                      // Via
     for (int i = 0; i < abs((double)e.first.z - e.second.z); i++)
@@ -407,6 +431,14 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
     point3d goal  = pins[i+1];
     route cur = (this->*routePins)(start, goal);
 
+    vector<edge> edges = getDecomposedEdges(cur);
+    for (int j = 0; j < edges.size(); j++)
+      r.push_back(edges[j]);
+
+    /*
+
+      MERGING NET CODE - bad for z layer assignment
+
     // Append to Net's route
     for (int j = 0; j < cur.size(); j++) {
       edge e = cur[j];
@@ -417,10 +449,12 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
         if ((isVertical(e) && isVertical(prev)) ||
             isHorizontal(e) && isHorizontal(prev))
           prev.second = e.second; // pass through
-        else
+        else {
           r.push_back(e);
+        }
       }
     }
+    */
   }
 
   // Z layer assignment
@@ -432,9 +466,14 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
       e.second.z = vLayer;
     } else if (isHorizontal(e)) {
       int hLayer = getHLayer(e);
+      int cap = getZCap(e, hLayer);
       e.first.z = hLayer;
       e.second.z = hLayer;          
+    } else if (isVia(e)) {
     }
+
+    if (e.first.z > 1)
+      printf("Edge %s on layer %d\n", edgeToString(e).c_str(), getZCap(e, e.first.z));
   }
   return r;
 }
