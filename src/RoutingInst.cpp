@@ -299,7 +299,7 @@ void RoutingInst::addRoute(route r)
 
     if (!isVia(e)) {
       int cap = getZCap(e, e.first.z);
-      printf("Edge %s has cap %d\n", edgeToString(e).c_str(), cap);
+      printf("Edge %s on layer %d has cap %d\n", edgeToString(e).c_str(), e.first.z, cap);
       setZCap(e, e.first.z, cap-1);
     }
   }
@@ -387,8 +387,10 @@ vector<edge> RoutingInst::getDecomposedEdge(edge &e)
       point3d pfirst, psecond;
       pfirst.x = e.first.x;
       pfirst.y = y;
+      pfirst.z = e.first.z;
       psecond.x = e.first.x;
       psecond.y = y+1;
+      psecond.z = e.first.z;
       if (starty == e.first.y)
         edges.push_back(edge(pfirst, psecond));
       else
@@ -401,8 +403,10 @@ vector<edge> RoutingInst::getDecomposedEdge(edge &e)
       point3d pfirst, psecond;
       pfirst.x = x;
       pfirst.y = e.first.y;
+      pfirst.z = e.first.z;
       psecond.x = x+1;
       psecond.y = e.first.y;
+      psecond.z = e.first.z;
       if (startx == e.first.x)
         edges.push_back(edge(pfirst, psecond));
       else

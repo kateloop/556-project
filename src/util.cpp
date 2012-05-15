@@ -124,5 +124,5 @@ bool isHorizontal(edge e)
 
 bool isVia(edge e)
 {
-  return !isVertical(e) & !isHorizontal(e);
+  return !isVertical(e) && !isHorizontal(e);
 }
