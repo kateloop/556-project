@@ -5,12 +5,10 @@
 #include <stack>
 #include <algorithm>
 
-
-#include <pthread.h>
+#define DEBUG
+#include <assert.h>
 
 using namespace std;
-
-int DEBUG_OFL = 0;
 
 bool netCompByOverflow(Net n1, Net n2)
 {
@@ -63,10 +61,7 @@ void RoutingInst::solveRouting()
   /****************************************
    * Initial Solution
    ****************************************/
-  printf("=== Initial capacities: ===\n");
-  printCaps();
-  printf("===========================\n");
-  printf("\n");
+  printf("=== Finding an initial solution ===\n");
   for (int i = 0; i < nets.size(); i++) {
     // Reorder this nets pins
     nets[i].reorderPins();
@@ -79,15 +74,12 @@ void RoutingInst::solveRouting()
 
     // Set Net's route and adjust capacities
     addRoute(r3d, nets[i]);
-
-    printCaps();
   }
 
   // Print stats before rip-up and re-route
   printf("=== Before Rip-up and Re-route ===\n");
   printf("Total wirelength: %d\n", getTotalWireLength());
   printf("Total overflow: %d\n", getTotalOverflow());
-  printf("Debug overflow: %d\n", DEBUG_OFL);
   printf("==================================\n\n");
 
   /****************************************
@@ -102,16 +94,18 @@ void RoutingInst::solveRouting()
     int initialRouteOFL = getRouteOverflow(initialRoute);
     int newTOF, newRouteOFL;
 
-    // DEBUG - before re-route
+    // Do not need to re-route if already below threshold
+    if (initialRouteOFL <= 50)
+      continue;
     printf("Re-routing a net with %d overflow... ", initialRouteOFL);
 
     // Remove old route
     removeRoute(nets[i]);
 
-    // DEBUG - test removal of route
-    if (initialTOF - initialRouteOFL != getTotalOverflow()) {
-      printf("--> Capacity mismatch after removing a route!!\n");
-    }
+    /************************************************************
+     *  DEBUG - make sure we are cleaning up routes correctly
+     ************************************************************/
+    assert(initialTOF - initialRouteOFL == getTotalOverflow());
 
     // Find a new one with less overflow
     route r2d = route2d(nets[i], &RoutingInst::bfs);
@@ -120,14 +114,14 @@ void RoutingInst::solveRouting()
     // Re-assign the Net's route
     addRoute(r3d, nets[i]);
 
-    // DEBUG - after re-route
     newRouteOFL = getRouteOverflow(r3d);
     newTOF = getTotalOverflow();
-    printf("replaced with %d overflow.  New TOF is : %d (diff: %d)\n", newRouteOFL, newTOF, initialTOF - newTOF);
-    if (newTOF - initialTOF != newRouteOFL - initialRouteOFL) {
-      printf("--> Capacity mismatch after adding new route!!\n");
-    }
-    printCaps();
+    printf("replaced with %d overflow.", newRouteOFL);
+
+    /************************************************************
+     *  DEBUG - make sure we are adding routes correctly
+     ************************************************************/
+    assert(newTOF - initialTOF == newRouteOFL - initialRouteOFL);
   }
   printf("TOF: %d\n", getTotalOverflow());
 }
@@ -203,7 +197,6 @@ int RoutingInst::getVLayer(edge e) {
       return i;
 
   // Else, return a default one
-  DEBUG_OFL++;
   for (int i = 0; i < vCap.size(); i++) {
     if (vCap[i]) {
       vLayer = i;
@@ -226,7 +219,6 @@ int RoutingInst::getHLayer(edge e) {
   }
 
   // Else, return a default one
-  DEBUG_OFL++;
   for (int i = 0; i < hCap.size(); i++) {
     if (hCap[i]) {
       hLayer = i;
@@ -243,6 +235,12 @@ int RoutingInst::getHLayer(edge e) {
 /* get capacity of edge, initialize if needed */
 int RoutingInst::getCap(edge e)
 {
+  /************************************************************
+   *  DEBUG - check types of edges passed in
+   ************************************************************/
+  assert(!isVia(e));
+  assert(isUnitEdge(e));
+
   // Initialize if necessary
   if (!edgeCapInitd2d[e]) {
     edgeCapInitd2d[e] = true;

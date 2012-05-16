@@ -126,3 +126,13 @@ bool isVia(edge e)
 {
   return !isVertical(e) && !isHorizontal(e);
 }
+
+bool isUnitEdge(edge e)
+{
+  if (isVia(e))
+    return false;
+  if (isVertical(e))
+    return abs((double)e.first.x - e.second.x) == 1;
+  else
+    return abs((double)e.first.y - e.second.y) == 1;
+}
