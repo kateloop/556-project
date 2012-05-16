@@ -63,6 +63,10 @@ void RoutingInst::solveRouting()
   /****************************************
    * Initial Solution
    ****************************************/
+  printf("=== Initial capacities: ===\n");
+  printCaps();
+  printf("===========================\n");
+  printf("\n");
   for (int i = 0; i < nets.size(); i++) {
     // Reorder this nets pins
     nets[i].reorderPins();
@@ -75,6 +79,8 @@ void RoutingInst::solveRouting()
 
     // Set Net's route and adjust capacities
     addRoute(r3d, nets[i]);
+
+    printCaps();
   }
 
   // All nets routed, give overflow
@@ -96,15 +102,22 @@ void RoutingInst::solveRouting()
   // Sort nets by ofl
   sort(nets.begin(), nets.end(), &netCompByOverflow);
 
-  int TOF = 0;
   for (int i = 0; i < nets.size(); i++) {
-    route original = nets[i].getRoute();
-    int ofl = getRouteOverflow(original);
-    if (ofl <= 50)
-      continue;
+    route initialRoute = nets[i].getRoute();
+    int initialTOF = getTotalOverflow();
+    int initialRouteOFL = getRouteOverflow(initialRoute);
+    int newTOF, newRouteOFL;
+
+    // DEBUG - before re-route
+    printf("Re-routing a net with %d overflow... ", initialRouteOFL);
 
     // Remove old route
     removeRoute(nets[i]);
+
+    // DEBUG - test removal of route
+    if (initialTOF - initialRouteOFL != getTotalOverflow()) {
+      printf("--> Capacity mismatch after removing a route!!\n");
+    }
 
     // Find a new one with less overflow
     route r2d = route2d(nets[i], &RoutingInst::bfs);
@@ -112,6 +125,15 @@ void RoutingInst::solveRouting()
 
     // Re-assign the Net's route
     addRoute(r3d, nets[i]);
+
+    // DEBUG - after re-route
+    newRouteOFL = getRouteOverflow(r3d);
+    newTOF = getTotalOverflow();
+    printf("replaced with %d overflow.  New TOF is : %d (diff: %d)\n", newRouteOFL, newTOF, initialTOF - newTOF);
+    if (newTOF - initialTOF != newRouteOFL - initialRouteOFL) {
+      printf("--> Capacity mismatch after adding new route!!\n");
+    }
+    printCaps();
   }
   printf("TOF: %d\n", getTotalOverflow());
 }
@@ -354,9 +376,11 @@ int RoutingInst::getRouteOverflow(route &r)
 int RoutingInst::getTotalOverflow()
 {
   int ofl = 0;
-  for (int i = 0; i < nets.size(); i++) {
-    route r = nets[i].getRoute();
-    ofl += getRouteOverflow(r);
+  for (map<edge, int>::iterator it = edgeCap2d.begin(); it != edgeCap2d.end(); it++) {
+    int curOfl = (*it).second;
+    edge e = (*it).first;
+    if (curOfl < 0 && !isVia(e))
+      ofl += -curOfl;
   }
   return ofl;
 }
@@ -444,27 +468,6 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
     vector<edge> edges = getDecomposedEdges(cur);
     for (int j = 0; j < edges.size(); j++)
       r.push_back(edges[j]);
-
-    /*
-
-      MERGING NET CODE - bad for z layer assignment
-
-    // Append to Net's route
-    for (int j = 0; j < cur.size(); j++) {
-      edge e = cur[j];
-      if (j == 0 || j == cur.size()-1)
-        r.push_back(e);
-      else {
-        edge &prev = r[r.size()-1];
-        if ((isVertical(e) && isVertical(prev)) ||
-            isHorizontal(e) && isHorizontal(prev))
-          prev.second = e.second; // pass through
-        else {
-          r.push_back(e);
-        }
-      }
-    }
-    */
   }
 
   // Z layer assignment
@@ -481,9 +484,6 @@ route RoutingInst::route2d(Net &n, route (RoutingInst::*routePins)(point3d, poin
       e.second.z = hLayer;          
     } else if (isVia(e)) {
     }
-
-    //    if (e.first.z > 1)
-    //      printf("Edge %s on layer %d\n", edgeToString(e).c_str(), getZCap(e, e.first.z));
   }
   return r;
 }
@@ -655,24 +655,46 @@ void RoutingInst::printInput()
 
 void RoutingInst::printCaps()
 {
-  printf("Horizontal capacities:\n");
+  return;
+
+  // Print top to bottom, left to right
+  for (int y = yGrid-1; y >= 0; y--) {
+    // Print horizontal caps first
+    for (int x = 0; x < xGrid-1; x++) {
+      edge e;
+      e.first.x = x;
+      e.first.y = y;
+      e.second.x = x+1;
+      e.second.y = y;
+      printf(" . %d", getCap(e));
+    }
+    printf(" .\n");
+    // Print vertical caps next
+    for (int x = 0; x < xGrid; x++) {
+      if (y == 0)
+        break;
+      edge e;
+      e.first.x = x;
+      e.first.y = y;
+      e.second.x = x;
+      e.second.y = y-1;
+      printf(" %d %c", getCap(e), x != xGrid - 1 ? '.' : '\n');
+    }
+  }
+  /*
   for (int y = 0; y < yGrid; y++) {
     for (int x = 0; x < xGrid-1; x++) {
-      if (x % 10 != 0)
-        continue;
       edge e;
       e.first.x = x;
       e.second.x = x+1;
       e.first.y = y;
       e.second.y = y;
-      //      printf("%d ", edgeCapInitd2d[e] < 0 ? 0 : 1);
-      printf("%d ", getCap(e) < 35 && !isBlocked[e] ? 1 : 0);
+      printf("%d ", getCap(e));
     }
     printf("\n");
   }
   printf("\n\n");
 
-  /*  
   printf("Vertical capacities:\n");
   for (int y = 0; y < yGrid-1; y++) {
     for (int x = 0; x < xGrid; x++) {
@@ -685,7 +707,7 @@ void RoutingInst::printCaps()
     }
     printf("\n");
   }
-  */
+           */
 }
 
 void RoutingInst::printGPins(vector<point3d> &gPins) {
