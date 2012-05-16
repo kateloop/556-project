@@ -44,8 +44,8 @@ public:
     // Want shortest distance -> highest value
     // i.e. p1 value is less, if its distance is greater
     //return p1.z > p2.z;
-    return l2Dist(p1) + 1000 * p1.z > l2Dist(p2) + 1000 * p2.z;
-    //    return l2Dist(p1) > l2Dist(p2);
+    return l2Dist(p1) + 10 * p1.z > l2Dist(p2) + 10 * p2.z;
+    //return l2Dist(p1) > l2Dist(p2);
   }
   private:
   L2Comp();
@@ -71,6 +71,7 @@ class RoutingInst
   void addNet (Net *n);
   void addBlockage(point3d p1, point3d p2, int cap);
   void printInput();
+  void printCaps();
   void solveRouting();
 
   /****************************************
