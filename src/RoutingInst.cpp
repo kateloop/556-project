@@ -238,7 +238,6 @@ int RoutingInst::getCap(edge e)
   /************************************************************
    *  DEBUG - check types of edges passed in
    ************************************************************/
-  assert(!isVia(e));
   assert(isUnitEdge(e));
 
   // Initialize if necessary
@@ -260,6 +259,11 @@ int RoutingInst::getCap(edge e)
 /* write over previous capacity */
 void RoutingInst::setCap(edge e, int cap)
 {
+  /************************************************************
+   *  DEBUG - check type of edges coming in
+   ************************************************************/
+  assert(isUnitEdge(e));
+
   edgeCapInitd2d[e] = true;
   edgeCap2d[e] = cap;
 }
