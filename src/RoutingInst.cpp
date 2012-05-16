@@ -307,11 +307,12 @@ void RoutingInst::addRoute(route r, Net &n)
   vector<edge> edges = getDecomposedEdges(r);
   for (int i = 0; i < edges.size(); i++) {
     edge e = edges[i];
-    int cap = getCap(e);
-    setCap(e, cap-1);
 
     if (!isVia(e)) {
-      int cap = getZCap(e, e.first.z);
+      int cap = getCap(e);
+      setCap(e, cap-1);
+
+      cap = getZCap(e, e.first.z);
       setZCap(e, e.first.z, cap-1);
     }
   }
@@ -330,11 +331,12 @@ void RoutingInst::removeRoute(Net &n)
   vector<edge> edges = getDecomposedEdges(r);
   for (int i = 0; i < edges.size(); i++) {
     edge e = edges[i];
-    int cap = getCap(e);
-    setCap(e, cap+1);
 
     if (!isVia(e)) {
-      int cap = getZCap(e, e.first.z);
+      int cap = getCap(e);
+      setCap(e, cap+1);
+
+      cap = getZCap(e, e.first.z);
       setZCap(e, e.first.z, cap+1);
     }
   }
