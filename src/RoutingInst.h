@@ -124,8 +124,9 @@ private:
   int getZCap(edge e, int layer);
   vector<int>& getZCap(edge e);
 
-  void addRoute(route r);
-  void removeRoute(route r);
+  // Add/remove routes to Nets
+  void addRoute(route r, Net &n);
+  void removeRoute(Net &n);
 
   int getTotalWireLength();
   int getTotalOverflow();

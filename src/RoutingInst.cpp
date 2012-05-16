@@ -73,12 +73,8 @@ void RoutingInst::solveRouting()
     // Find 3d solution
     route r3d = route3d(nets[i], r2d);
 
-    // Set this nets route
-    nets[i].setRoute(r3d);
-    // Adjust internal capacities
-    addRoute(r3d);
-
-    printCaps();
+    // Set Net's route and adjust capacities
+    addRoute(r3d, nets[i]);
   }
 
   // All nets routed, give overflow
@@ -104,27 +100,18 @@ void RoutingInst::solveRouting()
   for (int i = 0; i < nets.size(); i++) {
     route original = nets[i].getRoute();
     int ofl = getRouteOverflow(original);
-    if (ofl <= 0)
+    if (ofl <= 50)
       continue;
 
-    //printf("%d/%d :: Re-routing net with %d overflow... ", i, nets.size(), ofl);
-        //    printf("\n");
-        printCaps();
-
     // Remove old route
-    nets[i].setRoute(route());
-    removeRoute(nets[i].getRoute());
+    removeRoute(nets[i]);
 
-    // Find a new one
+    // Find a new one with less overflow
     route r2d = route2d(nets[i], &RoutingInst::bfs);
     route r3d = route3d(nets[i], r2d);
-    nets[i].setRoute(r3d);
-    nets[i].setOfl(getRouteOverflow(r3d));
-    addRoute(r3d);
 
-    int newOfl = nets[i].getOfl();
-    //printf("found route with %d ofl.  %d  \n", newOfl, getTotalOverflow());
-    fflush(stdout);
+    // Re-assign the Net's route
+    addRoute(r3d, nets[i]);
   }
   printf("TOF: %d\n", getTotalOverflow());
 }
@@ -289,9 +276,16 @@ vector<int>& RoutingInst::getZCap(edge e)
   return zCap[e];
 }
 
-// Adjust capacities for new route
-void RoutingInst::addRoute(route r)
+// Adjust capacities for new route and add to the Net
+void RoutingInst::addRoute(route r, Net &n)
 {
+  // Remove this Net's route (in case caller forgets)
+  removeRoute(n);
+  
+  // Set this Net's route
+  n.setRoute(r);
+
+  // Adjust global routing capacities
   vector<edge> edges = getDecomposedEdges(r);
   for (int i = 0; i < edges.size(); i++) {
     edge e = edges[i];
@@ -300,15 +294,21 @@ void RoutingInst::addRoute(route r)
 
     if (!isVia(e)) {
       int cap = getZCap(e, e.first.z);
-      //      printf("Edge %s on layer %d has cap %d\n", edgeToString(e).c_str(), e.first.z, cap);
       setZCap(e, e.first.z, cap-1);
     }
   }
 }
 
 // Adjust capacities by removing a route
-void RoutingInst::removeRoute(route r)
+void RoutingInst::removeRoute(Net &n)
 {
+  // Get this Net's route to remove capacities
+  route r = n.getRoute();
+
+  // Remove this Net's route (make it empty)
+  n.setRoute(route());
+
+  // Adjust global routing capacities
   vector<edge> edges = getDecomposedEdges(r);
   for (int i = 0; i < edges.size(); i++) {
     edge e = edges[i];
