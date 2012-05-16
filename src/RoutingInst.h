@@ -160,6 +160,8 @@ private:
   /* Get neighboring points */
   set<point3d> getNeighborPoints(point3d p);
 
+  // Give Net access to getRouteOverflow
+  friend class Net;
 };
 
 #endif // ROUTINGINST_H

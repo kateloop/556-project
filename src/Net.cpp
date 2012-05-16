@@ -2,8 +2,10 @@
 #include "util.h"
 #include <algorithm>
 
+#include "RoutingInst.h"
+
 /*constructor*/
-Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHeight) :
+Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHeight, RoutingInst *rst) :
   name(name),
   id(id),
   pinNum(pinNum),
@@ -11,7 +13,8 @@ Net::Net (string name, int id, int pinNum, int llx, int lly, int tWidth, int tHe
   lly(lly),
   tWidth(tWidth),
   tHeight(tHeight),
-  ofl(0)
+  ofl(0),
+  rst(rst)
 {
 }
 	
@@ -89,6 +92,6 @@ void Net::setOfl(int ofl) {
 }
 
 int Net::getOfl() {
-  return ofl;
+  return rst->getRouteOverflow(r);
 }
 

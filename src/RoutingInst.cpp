@@ -83,12 +83,6 @@ void RoutingInst::solveRouting()
     printCaps();
   }
 
-  // All nets routed, give overflow
-  for (int i = 0; i < nets.size(); i++) {
-    route r = nets[i].getRoute();
-    nets[i].setOfl(getRouteOverflow(r));
-  }
-
   // Print stats before rip-up and re-route
   printf("=== Before Rip-up and Re-route ===\n");
   printf("Total wirelength: %d\n", getTotalWireLength());

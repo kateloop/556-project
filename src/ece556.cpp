@@ -59,7 +59,7 @@ RoutingInst* readBenchmark(const char *fileName) {
     int netSize;		// Ignored
     inf >> netName >> netId >> numPins >> netSize;
 
-    Net *n = new Net(netName, netId, numPins, llx, lly, tWidth, tHeight);
+    Net *n = new Net(netName, netId, numPins, llx, lly, tWidth, tHeight, rst);
     // Parse pins
     for (int j = 0; j < numPins; j++) {
       point3d p;
