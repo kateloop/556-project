@@ -63,9 +63,6 @@ void RoutingInst::solveRouting()
    ****************************************/
   printf("=== Finding an initial solution ===\n");
   for (int i = 0; i < nets.size(); i++) {
-    //    int initialTOF = getTotalOverflow();
-    //    int routeOFL, newTOF;
-
     // Reorder this nets pins
     nets[i].reorderPins();
 
@@ -77,16 +74,6 @@ void RoutingInst::solveRouting()
 
     // Set Net's route and adjust capacities
     setRoute(r3d, nets[i]);
-
-    // DEBUG - watch TOF increase
-    //    newTOF = getTotalOverflow();
-    //    routeOFL = getRouteOverflow(r3d);
-    //    printf("TOF: %d + %d -> %d\n", initialTOF, routeOFL, newTOF);
-
-    /************************************************************
-     *  DEBUG - check addition of overflow
-     ************************************************************/
-    //    assert(initialTOF + routeOFL == newTOF);
   }
 
   // Print stats before rip-up and re-route
@@ -96,51 +83,60 @@ void RoutingInst::solveRouting()
   printf("==================================\n\n");
 
   /****************************************
-   *  Rip-up and Re-route
+   *  Rip-up and Re-routne
    ****************************************/
-  // Sort nets by ofl
-  sort(nets.begin(), nets.end(), &netCompByOverflow);
+  for (int j = 0; j < 10; j++) {
+    int routesChanged = 0;
 
-  for (int i = 0; i < nets.size(); i++) {
-    route initialRoute = nets[i].getRoute();
-    int initialTOF = getTotalOverflow();
-    int initialRouteOFL = getRouteOverflow(initialRoute);
-    int newTOF, newRouteOFL;
+    // Sort nets by ofl
+    sort(nets.begin(), nets.end(), &netCompByOverflow);
 
-    // Do not need to re-route if already below threshold
-    if (initialRouteOFL <= 50)
-      continue;
-    printf("Re-routing a net with %d overflow... ", initialRouteOFL);
-
-    /************************************************************
-     *  DEBUG - make sure we are cleaning up routes correctly
-     ************************************************************/
-    //    assert(initialTOF - initialRouteOFL == getTotalOverflow());
-
-    // Find a new one with less overflow
-    route r2d = route2d(nets[i], &RoutingInst::bfs);
-    route r3d = route3d(nets[i], r2d);
-
-    // Re-assign the Net's route
-    setRoute(r3d, nets[i]);
-
-    newRouteOFL = getRouteOverflow(r3d);
-    newTOF = getTotalOverflow();
-    printf("replaced with %d overflow.\n", newRouteOFL);
-
-    /************************************************************
-     *  DEBUG - make sure we are adding routes correctly
-     ************************************************************/
-    //    assert(newTOF - initialTOF == newRouteOFL - initialRouteOFL);
-
+    for (int i = 0; i < nets.size(); i++) {
+      route initialRoute = nets[i].getRoute();
+      //      int initialTOF = getTotalOverflow();
+      int initialRouteOFL = getRouteOverflow(initialRoute);
+      int newTOF, newRouteOFL;
+      
+      // Do not need to re-route if already below threshold
+      if (initialRouteOFL <= 0)
+        continue;
+      printf("Re-routing a net with %d overflow... ", initialRouteOFL);
+      
+      // Find a new one with less overflow
+      route r2d = route2d(nets[i], &RoutingInst::bfs);
+      route r3d = route3d(nets[i], r2d);
+      
+      // Re-assign the Net's route
+      setRoute(r3d, nets[i]);
+      
+      newRouteOFL = getRouteOverflow(r3d);
+      //      newTOF = getTotalOverflow();
+      if (newRouteOFL < initialRouteOFL) {
+        setRoute(r3d, nets[i]);
+        routesChanged++;
+        printf("replaced with %d overflow.\n", newRouteOFL);
+      } else {
+        setRoute(initialRoute, nets[i]);
+        printf("keeping old route.\n");
+      }
+      
+      fflush(stdout);
+    }
+    
+    // Print stats after rip-up and re-route
+    printf("\n");
+    printf("=== After Rip-up and Re-route ===\n");
+    printf("Total wirelength: %d\n", getTotalWireLength());
+    printf("Total overflow: %d\n", getTotalOverflow());
+    printf("==================================\n\n");
     fflush(stdout);
-  }
 
-  // Print stats after rip-up and re-route
-  printf("=== After Rip-up and Re-route ===\n");
-  printf("Total wirelength: %d\n", getTotalWireLength());
-  printf("Total overflow: %d\n", getTotalOverflow());
-  printf("==================================\n\n");
+    // Terminate if no more improvement
+    if (routesChanged == 0) {
+      printf("Halting due to no more improvements\n");
+      break;
+    }
+  }
 }
 
 
