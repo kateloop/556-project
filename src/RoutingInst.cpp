@@ -63,6 +63,9 @@ void RoutingInst::solveRouting()
    ****************************************/
   printf("=== Finding an initial solution ===\n");
   for (int i = 0; i < nets.size(); i++) {
+    //    int initialTOF = getTotalOverflow();
+    //    int routeOFL, newTOF;
+
     // Reorder this nets pins
     nets[i].reorderPins();
 
@@ -73,7 +76,17 @@ void RoutingInst::solveRouting()
     route r3d = route3d(nets[i], r2d);
 
     // Set Net's route and adjust capacities
-    addRoute(r3d, nets[i]);
+    setRoute(r3d, nets[i]);
+
+    // DEBUG - watch TOF increase
+    //    newTOF = getTotalOverflow();
+    //    routeOFL = getRouteOverflow(r3d);
+    //    printf("TOF: %d + %d -> %d\n", initialTOF, routeOFL, newTOF);
+
+    /************************************************************
+     *  DEBUG - check addition of overflow
+     ************************************************************/
+    //    assert(initialTOF + routeOFL == newTOF);
   }
 
   // Print stats before rip-up and re-route
@@ -99,31 +112,35 @@ void RoutingInst::solveRouting()
       continue;
     printf("Re-routing a net with %d overflow... ", initialRouteOFL);
 
-    // Remove old route
-    removeRoute(nets[i]);
-
     /************************************************************
      *  DEBUG - make sure we are cleaning up routes correctly
      ************************************************************/
-    assert(initialTOF - initialRouteOFL == getTotalOverflow());
+    //    assert(initialTOF - initialRouteOFL == getTotalOverflow());
 
     // Find a new one with less overflow
     route r2d = route2d(nets[i], &RoutingInst::bfs);
     route r3d = route3d(nets[i], r2d);
 
     // Re-assign the Net's route
-    addRoute(r3d, nets[i]);
+    setRoute(r3d, nets[i]);
 
     newRouteOFL = getRouteOverflow(r3d);
     newTOF = getTotalOverflow();
-    printf("replaced with %d overflow.", newRouteOFL);
+    printf("replaced with %d overflow.\n", newRouteOFL);
 
     /************************************************************
      *  DEBUG - make sure we are adding routes correctly
      ************************************************************/
-    assert(newTOF - initialTOF == newRouteOFL - initialRouteOFL);
+    //    assert(newTOF - initialTOF == newRouteOFL - initialRouteOFL);
+
+    fflush(stdout);
   }
-  printf("TOF: %d\n", getTotalOverflow());
+
+  // Print stats after rip-up and re-route
+  printf("=== After Rip-up and Re-route ===\n");
+  printf("Total wirelength: %d\n", getTotalWireLength());
+  printf("Total overflow: %d\n", getTotalOverflow());
+  printf("==================================\n\n");
 }
 
 
@@ -294,52 +311,35 @@ vector<int>& RoutingInst::getZCap(edge e)
   return zCap[e];
 }
 
-// Adjust capacities for new route and add to the Net
-void RoutingInst::addRoute(route r, Net &n)
+// Adjust capacities along edges of a route
+void RoutingInst::addRouteCap(route r, int cap)
 {
-  // Remove this Net's route (in case caller forgets)
-  removeRoute(n);
+  vector<edge> edges = getDecomposedEdges(r);
+  for (int i = 0; i < edges.size(); i++) {
+    edge e = edges[i];
+    
+    if (!isVia(e)) {
+      int cap2d = getCap(e);
+      setCap(e, cap2d + cap);
+
+      int capZ = getZCap(e, e.first.z);
+      setZCap(e, e.first.z, capZ + cap);
+    }
+  }
+}
+
+// Adjust capacities for new route and add to the Net
+void RoutingInst::setRoute(route r, Net &n)
+{
+  // Clean up the old route capacities
+  route initialRoute = n.getRoute();
+  addRouteCap(initialRoute, 1);
   
   // Set this Net's route
   n.setRoute(r);
 
   // Adjust global routing capacities
-  vector<edge> edges = getDecomposedEdges(r);
-  for (int i = 0; i < edges.size(); i++) {
-    edge e = edges[i];
-
-    if (!isVia(e)) {
-      int cap = getCap(e);
-      setCap(e, cap-1);
-
-      cap = getZCap(e, e.first.z);
-      setZCap(e, e.first.z, cap-1);
-    }
-  }
-}
-
-// Adjust capacities by removing a route
-void RoutingInst::removeRoute(Net &n)
-{
-  // Get this Net's route to remove capacities
-  route r = n.getRoute();
-
-  // Remove this Net's route (make it empty)
-  n.setRoute(route());
-
-  // Adjust global routing capacities
-  vector<edge> edges = getDecomposedEdges(r);
-  for (int i = 0; i < edges.size(); i++) {
-    edge e = edges[i];
-
-    if (!isVia(e)) {
-      int cap = getCap(e);
-      setCap(e, cap+1);
-
-      cap = getZCap(e, e.first.z);
-      setZCap(e, e.first.z, cap+1);
-    }
-  }
+  addRouteCap(r, -1);
 }
 
 // Returns the 3D wirelength for all nets' routes
@@ -364,8 +364,10 @@ int RoutingInst::getRouteOverflow(route &r)
       continue;
     else if (getCap(e) >= 0)
       continue;
-    else
+    else {
+      //      printf("Route OFL :: %d @ %s\n", getCap(e), edgeToString(e).c_str());
       ofl++;
+    }
   }
   return ofl;
 }
@@ -377,8 +379,16 @@ int RoutingInst::getTotalOverflow()
   for (map<edge, int>::iterator it = edgeCap2d.begin(); it != edgeCap2d.end(); it++) {
     int curOfl = (*it).second;
     edge e = (*it).first;
-    if (curOfl < 0 && !isVia(e))
+
+    /************************************************************
+     *  DEBUG - validate edges
+     ************************************************************/
+    assert(isUnitEdge(e));
+
+    if (curOfl < 0) { 
+      //      printf("Total OFL :: %d @ %s\n", getCap(e), edgeToString(e).c_str());
       ofl += -curOfl;
+    }
   }
   return ofl;
 }
