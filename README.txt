@@ -14,13 +14,7 @@ To build, run:
 make
 
 Then execute:
-./ROUTE.exe /path/to/input /path/to/output [NUMTHREADS]
-
-The number of threads is optional, and default is 1.
-
-For faster testing, run with 4 threads.  However, this
-is currently experimental and fails to start once in a while...
-
+./ROUTE.exe /path/to/input /path/to/output <max_rounds> <max_time>
 
 ========================================
 =  Memory Usage
