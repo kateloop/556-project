@@ -99,11 +99,6 @@ void RoutingInst::solveRouting()
       break;
     }
 
-    // Sort nets by ofl
-    printf("Sorting nets by overflow...\n");
-    fflush(stdout);
-    //    sort(nets.begin(), nets.end(), &netCompByOverflow);
-
     for (int i = 0; i < nets.size(); i++) {
       route initialRoute = nets[i].getRoute();
       //      int initialTOF = getTotalOverflow();
@@ -138,7 +133,7 @@ void RoutingInst::solveRouting()
         printf("keeping old route (%d).\n", newRouteOFL);
       }
       
-      fflush(stdout);
+      //      fflush(stdout);
     }
     
     // Print stats after rip-up and re-route

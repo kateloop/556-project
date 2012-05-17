@@ -28,7 +28,7 @@ make
 # Run it
 echo $0: Routing...
 echo
-time ./ROUTE.exe $1 $1.out 20 20
+time ./ROUTE.exe $1 $1.out 20 2
 
 # Check the output
 if [ -f $1.out ]; then
