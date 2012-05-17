@@ -8,6 +8,9 @@
 #define DEBUG
 #include <assert.h>
 
+int MAX_RR_ROUNDS=1;
+int MAX_RR_MINS=1;
+
 using namespace std;
 
 bool netCompByOverflow(Net n1, Net n2)
@@ -85,22 +88,37 @@ void RoutingInst::solveRouting()
   /****************************************
    *  Rip-up and Re-routne
    ****************************************/
-  for (int j = 0; j < 10; j++) {
+  time_t startTime = time(NULL);
+  for (int j = 0; j < MAX_RR_ROUNDS; j++) {
     int routesChanged = 0;
 
+    // Check time
+    time_t elapsedTime = time(NULL) - startTime;
+    if (elapsedTime / 60 >= MAX_RR_MINS) {
+      printf("Termination condition reached: Max time\n");
+      break;
+    }
+
     // Sort nets by ofl
-    sort(nets.begin(), nets.end(), &netCompByOverflow);
+    printf("Sorting nets by overflow...\n");
+    fflush(stdout);
+    //    sort(nets.begin(), nets.end(), &netCompByOverflow);
 
     for (int i = 0; i < nets.size(); i++) {
       route initialRoute = nets[i].getRoute();
       //      int initialTOF = getTotalOverflow();
       int initialRouteOFL = getRouteOverflow(initialRoute);
       int newTOF, newRouteOFL;
+
+      // Check elapsed time 
+      elapsedTime = time(NULL) - startTime;
+      if (elapsedTime / 60 >= MAX_RR_MINS)
+        break;      
       
       // Do not need to re-route if already below threshold
       if (initialRouteOFL <= 0)
         continue;
-      printf("(%d/%d) :: Re-routing a net with %d overflow... ", i, nets.size(), initialRouteOFL);
+      printf("%d : (%d/%d) :: Re-routing a net with %d overflow... ", elapsedTime, i, nets.size(), initialRouteOFL);
       
       // Find a new one with less overflow
       route r2d = route2d(nets[i], &RoutingInst::bfs);
@@ -133,7 +151,7 @@ void RoutingInst::solveRouting()
 
     // Terminate if no more improvement
     if (routesChanged == 0) {
-      printf("Halting due to no more improvements\n");
+      printf("Termination condition reached: no more improvements\n");
       break;
     }
   }

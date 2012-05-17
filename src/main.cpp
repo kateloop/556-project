@@ -12,18 +12,21 @@
 #include "ece556.h"
 #include <stdlib.h>
 
-extern int NUMTHREADS;
+extern int MAX_RR_ROUNDS;
+extern int MAX_RR_MINS;
 
 int main(int argc, char **argv)
 {
-  if (argc != 3) {
-    printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name>\n");
+  if (argc != 5) {
+    printf("Usage : ./ROUTE.exe <input_benchmark_name> <output_file_name> <max_rounds> <max_time>\n");
     return 1;
   }
 
   int status;
   char *inputFileName = argv[1];
   char *outputFileName = argv[2];
+  MAX_RR_ROUNDS = atoi(argv[3]);
+  MAX_RR_MINS = atoi(argv[4]);
   RoutingInst *rst;
 
   /// read benchmark

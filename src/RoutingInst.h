@@ -44,7 +44,7 @@ public:
     // Want shortest distance -> highest value
     // i.e. p1 value is less, if its distance is greater
     //return p1.z > p2.z;
-    return l2Dist(p1) + 10 * p1.z > l2Dist(p2) + 10 * p2.z;
+    return l2Dist(p1) + 20 * p1.z > l2Dist(p2) + 20 * p2.z;
     //    return l2Dist(p1) > l2Dist(p2);
   }
   private:
