@@ -100,7 +100,7 @@ void RoutingInst::solveRouting()
       // Do not need to re-route if already below threshold
       if (initialRouteOFL <= 0)
         continue;
-      printf("Re-routing a net with %d overflow... ", initialRouteOFL);
+      printf("(%d/%d) :: Re-routing a net with %d overflow... ", i, nets.size(), initialRouteOFL);
       
       // Find a new one with less overflow
       route r2d = route2d(nets[i], &RoutingInst::bfs);
@@ -117,7 +117,7 @@ void RoutingInst::solveRouting()
         printf("replaced with %d overflow.\n", newRouteOFL);
       } else {
         setRoute(initialRoute, nets[i]);
-        printf("keeping old route.\n");
+        printf("keeping old route (%d).\n", newRouteOFL);
       }
       
       fflush(stdout);
@@ -552,6 +552,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
     // Goal test
     if (p == goal) {
       stack<edge> s;
+      //printf("Solution found with %d ofl\n", p.z);
       
       // Retrace and reverse
       while (p != start) {
@@ -577,7 +578,7 @@ route RoutingInst::bfs(point3d start, point3d goal)
         point3d next = *it;
         edge e = makeEdge(p, next);
         if (!started[next] &&
-            !isBlocked[e] &&
+            //            !isBlocked[e] &&
             next.x >= 0  &&
             next.y >= 0) {
           int cap = getCap(e);
